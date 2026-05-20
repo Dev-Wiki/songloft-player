@@ -757,10 +757,7 @@ class _PluginItemState extends ConsumerState<_PluginItem> {
               height: 24,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-            : Switch(
-              value: plugin.isActive,
-              onChanged: plugin.isError ? null : (_) => _togglePlugin(),
-            );
+            : Switch(value: plugin.isActive, onChanged: (_) => _togglePlugin());
 
     if (isMobile) {
       return [

@@ -21,14 +21,15 @@ class JSPluginGrid extends ConsumerWidget {
 
     return pluginsAsync.when(
       data: (plugins) {
-        final activePlugins = plugins
-            .where(
-              (p) =>
-                  p.isActive &&
-                  p.entryPath != null &&
-                  p.entryPath!.isNotEmpty,
-            )
-            .toList();
+        final activePlugins =
+            plugins
+                .where(
+                  (p) =>
+                      p.isActive &&
+                      p.entryPath != null &&
+                      p.entryPath!.isNotEmpty,
+                )
+                .toList();
 
         if (activePlugins.isEmpty) {
           return const SizedBox.shrink();
@@ -41,20 +42,24 @@ class JSPluginGrid extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'JS 插件',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 12),
             LayoutBuilder(
               builder: (context, constraints) {
                 final containerWidth = constraints.maxWidth - 32;
-                final crossAxisCount = context.isMobile ||
-                        containerWidth < ResponsiveBreakpoints.tablet
-                    ? (containerWidth / 180).floor().clamp(1, 2)
-                    : context.responsive<int>(
-                        mobile: 2, tablet: 3, desktop: 4);
+                final crossAxisCount =
+                    context.isMobile ||
+                            containerWidth < ResponsiveBreakpoints.tablet
+                        ? (containerWidth / 180).floor().clamp(1, 2)
+                        : context.responsive<int>(
+                          mobile: 2,
+                          tablet: 3,
+                          desktop: 4,
+                        );
 
                 final spacing = context.responsive<double>(
                   mobile: 12,
@@ -125,11 +130,7 @@ class _JSPluginCard extends StatelessWidget {
                   color: iconColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.javascript,
-                  color: iconColor,
-                  size: 24,
-                ),
+                child: Icon(Icons.javascript, color: iconColor, size: 24),
               ),
               const SizedBox(width: 12),
               // 中间信息
@@ -175,16 +176,16 @@ class _JSPluginCard extends StatelessWidget {
       return;
     }
 
-    final url =
-        '${AppConfig.baseUrl}/api/v1/jsplugin/${plugin.entryPath}';
+    final url = '${AppConfig.baseUrl}/api/v1/jsplugin/${plugin.entryPath}';
 
     if (kIsWeb) {
       // Web 平台：使用 launchUrl 在新标签页打开
       final token = SecureStorageService.cachedAccessToken ?? '';
       final separator = url.contains('?') ? '&' : '?';
-      final webUrl = token.isNotEmpty
-          ? Uri.parse('$url${separator}access_token=$token')
-          : Uri.parse(url);
+      final webUrl =
+          token.isNotEmpty
+              ? Uri.parse('$url${separator}access_token=$token')
+              : Uri.parse(url);
       launchUrl(webUrl, mode: LaunchMode.externalApplication);
     } else {
       // 原生平台：应用内 WebView

@@ -472,7 +472,8 @@ class _JSPluginItemState extends ConsumerState<_JSPluginItem> {
 
     try {
       final api = ref.read(jsPluginApiProvider);
-      final result = await api.checkUpdate(widget.plugin.id)
+      final result = await api
+          .checkUpdate(widget.plugin.id)
           .timeout(const Duration(seconds: 20));
       if (mounted) {
         if (result.hasUpdate) {
@@ -487,10 +488,7 @@ class _JSPluginItemState extends ConsumerState<_JSPluginItem> {
       }
     } on ApiException catch (e) {
       if (mounted) {
-        ResponsiveSnackBar.showError(
-          context,
-          message: '检查更新失败: ${e.message}',
-        );
+        ResponsiveSnackBar.showError(context, message: '检查更新失败: ${e.message}');
       }
     } on TimeoutException {
       if (mounted) {
@@ -728,10 +726,7 @@ class _JSPluginItemState extends ConsumerState<_JSPluginItem> {
               height: 24,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-            : Switch(
-              value: plugin.isActive,
-              onChanged: plugin.isError ? null : (_) => _togglePlugin(),
-            );
+            : Switch(value: plugin.isActive, onChanged: (_) => _togglePlugin());
 
     if (isMobile) {
       return [
