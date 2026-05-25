@@ -8,10 +8,7 @@ import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../playlist/domain/playlist.dart';
 import '../../playlist/presentation/providers/playlist_provider.dart';
-import '../../settings/data/plugin_api.dart';
-import '../../settings/presentation/providers/settings_provider.dart';
 import 'widgets/playlist_carousel.dart';
-import 'widgets/plugin_grid.dart';
 import '../../../features/jsplugin/presentation/widgets/jsplugin_grid.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 
@@ -24,7 +21,6 @@ class HomePage extends ConsumerWidget {
     final playlistsAsync = ref.watch(playlistListProvider(null));
     final normalPlaylistsAsync = ref.watch(playlistListProvider('normal'));
     final radioPlaylistsAsync = ref.watch(playlistListProvider('radio'));
-    final pluginsAsync = ref.watch(pluginsProvider);
 
     return Scaffold(
       body: RefreshIndicator(
@@ -71,7 +67,6 @@ class HomePage extends ConsumerWidget {
                       context,
                       ref,
                       state.items,
-                      pluginsAsync.value ?? [],
                       normalTotalCount:
                           normalPlaylistsAsync.value?.totalCount ?? 0,
                       radioTotalCount:
@@ -94,8 +89,7 @@ class HomePage extends ConsumerWidget {
   Widget _buildContent(
     BuildContext context,
     WidgetRef ref,
-    List<Playlist> playlists,
-    List<Plugin> plugins, {
+    List<Playlist> playlists, {
     required int normalTotalCount,
     required int radioTotalCount,
   }) {
@@ -105,15 +99,6 @@ class HomePage extends ConsumerWidget {
     // 分离普通歌单和电台歌单
     final normalPlaylists = playlists.where((p) => p.type == 'normal').toList();
     final radioPlaylists = playlists.where((p) => p.type == 'radio').toList();
-
-    // 筛选活跃且有入口路径的插件
-    final activePlugins =
-        plugins
-            .where(
-              (p) =>
-                  p.isActive && p.entryPath != null && p.entryPath!.isNotEmpty,
-            )
-            .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,31 +155,6 @@ class HomePage extends ConsumerWidget {
               context.push('/playlists/${playlist.id}');
             },
           ),
-          const SizedBox(height: 32),
-        ],
-
-        // 插件入口区域
-        if (activePlugins.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '插件入口',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.go(AppRoutes.settings),
-                  child: const Text('管理插件'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          PluginGrid(plugins: activePlugins),
           const SizedBox(height: 32),
         ],
 

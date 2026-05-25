@@ -9,7 +9,6 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/cache_api.dart';
 import '../../data/config_api.dart';
 import '../../data/directory_api.dart';
-import '../../data/plugin_api.dart';
 import '../../data/scan_api.dart';
 import '../../data/frontend_version_api.dart';
 import '../../data/upgrade_api.dart';
@@ -34,12 +33,6 @@ final scanApiProvider = Provider<ScanApi>((ref) {
 final directoryApiProvider = Provider<DirectoryApi>((ref) {
   final dio = ref.watch(dioProvider);
   return DirectoryApi(dio: dio);
-});
-
-/// PluginApi Provider
-final pluginApiProvider = Provider<PluginApi>((ref) {
-  final dio = ref.watch(dioProvider);
-  return PluginApi(dio: dio);
 });
 
 /// UpgradeApi Provider
@@ -89,12 +82,6 @@ final autoConvertEnabledProvider = FutureProvider<bool>((ref) async {
 final configsProvider = FutureProvider<List<Config>>((ref) async {
   final configApi = ref.watch(configApiProvider);
   return configApi.getConfigs();
-});
-
-/// 获取插件列表
-final pluginsProvider = FutureProvider<List<Plugin>>((ref) async {
-  final pluginApi = ref.watch(pluginApiProvider);
-  return pluginApi.getPlugins();
 });
 
 /// 检查服务端更新
