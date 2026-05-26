@@ -117,7 +117,7 @@ class _LyricsViewState extends State<LyricsView> {
       _loadFailed = false;
       _fetchedLyricText = null;
       _lastFetchedUrl = null;
-      _parsedLines = [];
+      _lyrics = [];
       _currentLineIndex = -1;
     }
   }

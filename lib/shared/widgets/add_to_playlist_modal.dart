@@ -287,7 +287,7 @@ class _AddToPlaylistModalState extends ConsumerState<AddToPlaylistModal> {
                           return ListTile(
                             leading: CoverImage(
                               coverUrl: playlist.coverUrl,
-                              coverPath: playlist.coverPath,
+                              
                               size: 48,
                               placeholderIcon: Icons.playlist_play,
                             ),

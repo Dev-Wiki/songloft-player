@@ -4,8 +4,7 @@ class Playlist {
   final String type; // 'normal' 或 'radio'
   final String name;
   final String? description;
-  final String? coverPath;
-  final String? coverUrl;
+  final String? coverUrl; // 封面URL（后端统一处理）
   final List<String> labels; // ["built_in"] 或 ["auto_created"]
   final int songCount;
   final DateTime createdAt;
@@ -16,7 +15,6 @@ class Playlist {
     required this.type,
     required this.name,
     this.description,
-    this.coverPath,
     this.coverUrl,
     this.labels = const [],
     this.songCount = 0,
@@ -30,7 +28,6 @@ class Playlist {
       type: json['type'] as String? ?? 'normal',
       name: json['name'] as String,
       description: json['description'] as String?,
-      coverPath: json['cover_path'] as String?,
       coverUrl: json['cover_url'] as String?,
       labels:
           (json['labels'] as List<dynamic>?)
@@ -55,7 +52,6 @@ class Playlist {
       'type': type,
       'name': name,
       'description': description,
-      'cover_path': coverPath,
       'cover_url': coverUrl,
       'labels': labels,
       'song_count': songCount,
@@ -81,7 +77,6 @@ class Playlist {
       type: type ?? this.type,
       name: name ?? this.name,
       description: description ?? this.description,
-      coverPath: coverPath ?? this.coverPath,
       coverUrl: coverUrl ?? this.coverUrl,
       labels: labels ?? this.labels,
       songCount: songCount ?? this.songCount,

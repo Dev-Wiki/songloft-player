@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/cover_url.dart';
 import '../../../../shared/models/song.dart';
 import '../providers/playlist_provider.dart';
 
@@ -65,9 +64,7 @@ class SongCoverPickerModal extends ConsumerWidget {
                 // 过滤有封面的歌曲
                 final songsWithCover =
                     state.items.where((song) {
-                      return (song.coverPath != null &&
-                              song.coverPath!.isNotEmpty) ||
-                          (song.coverUrl != null && song.coverUrl!.isNotEmpty);
+                      return song.coverUrl != null && song.coverUrl!.isNotEmpty;
                     }).toList();
 
                 if (songsWithCover.isEmpty && !state.hasMore) {
@@ -123,10 +120,9 @@ class SongCoverPickerModal extends ConsumerWidget {
                             return _CoverGridItem(
                               song: song,
                               onTap: () {
-                                Navigator.of(context).pop({
-                                  'coverPath': song.coverPath,
-                                  'coverUrl': song.coverUrl,
-                                });
+                                Navigator.of(
+                                  context,
+                                ).pop({'coverUrl': song.coverUrl});
                               },
                             );
                           }, childCount: songsWithCover.length),
@@ -253,10 +249,7 @@ class _CoverGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     return InkWell(
       onTap: onTap,

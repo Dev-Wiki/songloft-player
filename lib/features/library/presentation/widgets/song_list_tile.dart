@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../config/constants.dart';
 import '../../../../core/theme/responsive.dart';
-import '../../../../core/utils/cover_url.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/song.dart';
 import '../../../../shared/widgets/favorite_button.dart';
@@ -52,10 +51,7 @@ class SongListTile extends ConsumerWidget {
 
   Widget _buildMobileLayout(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     return ListTile(
       leading:
@@ -77,10 +73,7 @@ class SongListTile extends ConsumerWidget {
   Widget _buildDesktopLayout(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     return InkWell(
       onTap: isSelectionMode ? onSelect : onTap,

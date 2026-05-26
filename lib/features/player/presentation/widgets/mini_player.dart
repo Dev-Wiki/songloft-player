@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_dimensions.dart';
-import '../../../../core/utils/cover_url.dart';
 
 import '../providers/player_provider.dart';
 import 'mobile_player.dart';
@@ -65,13 +64,7 @@ class MiniPlayer extends ConsumerWidget {
                   child: Row(
                     children: [
                       // 封面
-                      _buildCover(
-                        context,
-                        CoverUrl.buildCoverUrl(
-                          coverUrl: song.coverUrl,
-                          coverPath: song.coverPath,
-                        ),
-                      ),
+                      _buildCover(context, song.coverUrl),
                       const SizedBox(width: 12),
                       // 标题和艺术家
                       Expanded(

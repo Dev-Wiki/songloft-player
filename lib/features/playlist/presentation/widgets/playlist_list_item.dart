@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/cover_url.dart';
 import '../../domain/playlist.dart';
 
 /// 歌单列表项组件（列表视图）
@@ -29,10 +28,7 @@ class PlaylistListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: playlist.coverUrl,
-      coverPath: playlist.coverPath,
-    );
+    final coverUrl = playlist.coverUrl;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 

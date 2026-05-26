@@ -380,7 +380,7 @@ class _SongPickerModalState extends ConsumerState<SongPickerModal> {
                                 const SizedBox(width: 8),
                                 CoverImage(
                                   coverUrl: song.coverUrl,
-                                  coverPath: song.coverPath,
+                                  
                                   size: 48,
                                   borderRadius: 8,
                                 ),

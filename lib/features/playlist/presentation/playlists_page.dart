@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../config/constants.dart';
 import '../../../core/theme/responsive.dart';
-import '../../../core/utils/cover_url.dart';
 import '../../../shared/utils/responsive_snackbar.dart';
 import '../../player/presentation/providers/player_provider.dart';
 import '../domain/playlist.dart';
@@ -532,11 +531,7 @@ class _PlaylistsPageState extends ConsumerState<PlaylistsPage> {
       onReorder: _onReorder,
       itemBuilder: (context, index) {
         final playlist = _sortablePlaylists[index];
-        final coverUrl = CoverUrl.buildCoverUrl(
-          coverUrl: playlist.coverUrl,
-          coverPath: playlist.coverPath,
-        );
-
+        final coverUrl = playlist.coverUrl;
         return Card(
           key: ValueKey(playlist.id),
           child: Padding(
@@ -861,7 +856,7 @@ class _PlaylistsPageState extends ConsumerState<PlaylistsPage> {
             initialName: playlist.name,
             initialDescription: playlist.description,
             initialType: playlist.type,
-            initialCoverPath: playlist.coverPath,
+
             initialCoverUrl: playlist.coverUrl,
             playlistId: playlist.id,
             isEdit: true,
@@ -895,7 +890,7 @@ class _PlaylistsPageState extends ConsumerState<PlaylistsPage> {
           playlist.id,
           name: result['name'] as String,
           description: result['description'] as String?,
-          coverPath: uploadedPlaylist?.coverPath,
+
           coverUrl: uploadedPlaylist?.coverUrl,
         );
 
@@ -1287,17 +1282,11 @@ class _PlaylistFormDialogState extends State<_PlaylistFormDialog> {
   String? get _previewCoverUrl {
     if (_coverMode == 'clear') return null;
     if (_coverMode == 'song') {
-      return CoverUrl.buildCoverUrl(
-        coverUrl: _selectedCoverUrl,
-        coverPath: _selectedCoverPath,
-      );
+      return _selectedCoverUrl;
     }
     // 未修改时显示原有封面
     if (_coverMode == null) {
-      return CoverUrl.buildCoverUrl(
-        coverUrl: widget.initialCoverUrl,
-        coverPath: widget.initialCoverPath,
-      );
+      return widget.initialCoverUrl;
     }
     return null;
   }
@@ -1309,7 +1298,6 @@ class _PlaylistFormDialogState extends State<_PlaylistFormDialog> {
         type: FileType.image,
         withData: kIsWeb,
       );
-
       if (result != null && result.files.isNotEmpty) {
         setState(() {
           _localFile = result.files.first;
@@ -1356,7 +1344,6 @@ class _PlaylistFormDialogState extends State<_PlaylistFormDialog> {
             _coverMode == 'song' ||
             widget.initialCoverPath?.isNotEmpty == true ||
             widget.initialCoverUrl?.isNotEmpty == true);
-
     return AlertDialog(
       title: Text(widget.title),
       content: Form(
@@ -1381,7 +1368,6 @@ class _PlaylistFormDialogState extends State<_PlaylistFormDialog> {
                     child: _buildCoverPreview(colorScheme),
                   ),
                   const SizedBox(height: 12),
-
                   // 封面操作按钮
                   Wrap(
                     spacing: 8,
@@ -1415,7 +1401,6 @@ class _PlaylistFormDialogState extends State<_PlaylistFormDialog> {
                   ),
                   const SizedBox(height: 16),
                 ],
-
                 // 歌单名称
                 TextFormField(
                   controller: _nameController,
@@ -1434,7 +1419,6 @@ class _PlaylistFormDialogState extends State<_PlaylistFormDialog> {
                   enabled: !widget.isBuiltIn,
                 ),
                 const SizedBox(height: 16),
-
                 // 歌单描述
                 TextFormField(
                   controller: _descriptionController,
@@ -1447,7 +1431,6 @@ class _PlaylistFormDialogState extends State<_PlaylistFormDialog> {
                   enabled: !widget.isBuiltIn,
                 ),
                 const SizedBox(height: 16),
-
                 // 歌单类型（仅创建时可选）
                 if (!widget.isEdit)
                   SegmentedButton<String>(

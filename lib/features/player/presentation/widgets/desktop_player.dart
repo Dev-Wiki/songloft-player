@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/cover_url.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/favorite_button.dart';
 import '../../domain/player_state.dart';
@@ -97,10 +96,7 @@ class DesktopPlayer extends ConsumerWidget {
     }
 
     final song = state.currentSong!;
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     return Row(
       children: [
@@ -298,10 +294,7 @@ class DesktopPlayer extends ConsumerWidget {
     ThemeData theme,
   ) {
     final hasSong = state.hasSong;
-    final hasLyrics =
-        hasSong &&
-        state.currentSong?.lyric != null &&
-        state.currentSong!.lyric!.isNotEmpty;
+    final hasLyrics = hasSong && state.currentSong?.lyricUrl != null;
 
     return IconButton(
       onPressed: hasSong ? () => DesktopFullPlayer.show(context) : null,

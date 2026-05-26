@@ -12,7 +12,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../core/utils/color_extraction.dart';
-import '../../../core/utils/cover_url.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/song.dart';
 import '../../../shared/utils/responsive_snackbar.dart';
@@ -108,8 +107,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
     await ref.read(playlistSongsProvider(_playlistIdInt).notifier).loadAll();
     if (!mounted) return;
     final fullSongs =
-        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ??
-        songs;
+        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ?? songs;
     setState(() {
       _isSortMode = true;
       _isSelectMode = false;
@@ -147,8 +145,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
     await ref.read(playlistSongsProvider(_playlistIdInt).notifier).loadAll();
     if (!mounted) return;
     final fullSongs =
-        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ??
-        songs;
+        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ?? songs;
 
     final sorted = List<Song>.from(fullSongs);
     sorted.sort((a, b) {
@@ -200,8 +197,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
     await ref.read(playlistSongsProvider(_playlistIdInt).notifier).loadAll();
     if (!mounted) return;
     final fullSongs =
-        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ??
-        songs;
+        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ?? songs;
 
     final sorted = List<Song>.from(fullSongs);
     sorted.sort((a, b) {
@@ -390,10 +386,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
     final isWide = context.isWideScreen;
 
     // 提取封面主色用于渐变遮罩
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: playlist.coverUrl,
-      coverPath: playlist.coverPath,
-    );
+    final coverUrl = playlist.coverUrl;
     final paletteAsync = ref.watch(coverColorsProvider(coverUrl));
     final palette = paletteAsync.value;
 
@@ -527,10 +520,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
     Playlist playlist,
     CoverPalette? palette,
   ) {
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: playlist.coverUrl,
-      coverPath: playlist.coverPath,
-    );
+    final coverUrl = playlist.coverUrl;
     final colorScheme = Theme.of(context).colorScheme;
 
     // 渐变遮罩 - 使用封面主色调，fallback 到黑色
@@ -756,10 +746,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
                 .loadAll();
             if (!mounted) return;
             final fullSongs =
-                ref
-                    .read(playlistSongsProvider(_playlistIdInt))
-                    .value
-                    ?.items ??
+                ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ??
                 songs;
             _toggleSelectAll(fullSongs);
           },
@@ -1241,10 +1228,16 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
       final data = e.response?.data;
       final backendMsg = data is Map ? data['error']?.toString() : null;
       final status = e.response?.statusCode ?? 0;
-      if (backendMsg != null && backendMsg.isNotEmpty && status >= 400 && status < 500) {
+      if (backendMsg != null &&
+          backendMsg.isNotEmpty &&
+          status >= 400 &&
+          status < 500) {
         ResponsiveSnackBar.show(context, message: backendMsg);
       } else {
-        ResponsiveSnackBar.showError(context, message: '启动转换失败: ${e.message ?? e}');
+        ResponsiveSnackBar.showError(
+          context,
+          message: '启动转换失败: ${e.message ?? e}',
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -1365,10 +1358,7 @@ class _SongListTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     return ListTile(
       onTap: onTap,
@@ -1546,17 +1536,14 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
   String? get _previewCoverUrl {
     if (_coverMode == 'clear') return null;
     if (_coverMode == 'song') {
-      return CoverUrl.buildCoverUrl(
-        coverUrl: _selectedCoverUrl,
-        coverPath: _selectedCoverPath,
-      );
+      return _selectedCoverUrl;
+    }
+    if (_coverMode == 'local') {
+      return _localFile?.path;
     }
     // 未修改时显示原有封面
     if (_coverMode == null) {
-      return CoverUrl.buildCoverUrl(
-        coverUrl: widget.playlist.coverUrl,
-        coverPath: widget.playlist.coverPath,
-      );
+      return widget.playlist.coverUrl;
     }
     return null;
   }
@@ -1568,7 +1555,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
         type: FileType.image,
         withData: kIsWeb,
       );
-
       if (result != null && result.files.isNotEmpty) {
         setState(() {
           _localFile = result.files.first;
@@ -1612,13 +1598,10 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
       ResponsiveSnackBar.showError(context, message: '请输入歌单名称');
       return;
     }
-
     setState(() => _isSaving = true);
-
     try {
       final notifier = ref.read(playlistNotifierProvider.notifier);
       final description = _descController.text.trim();
-
       // 处理封面上传
       if (_coverMode == 'local' && _localFile != null) {
         final file = _localFile!;
@@ -1639,8 +1622,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
           widget.playlistId,
           name: name,
           description: description.isEmpty ? null : description,
-          coverPath: uploadedPlaylist.coverPath,
-          coverUrl: uploadedPlaylist.coverUrl,
         );
       } else if (_coverMode == 'song') {
         // 从歌曲选择的封面
@@ -1649,7 +1630,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
           name: name,
           description: description.isEmpty ? null : description,
           coverPath: _selectedCoverPath ?? '',
-          coverUrl: _selectedCoverUrl ?? '',
         );
       } else if (_coverMode == 'clear') {
         // 清除封面
@@ -1658,7 +1638,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
           name: name,
           description: description.isEmpty ? null : description,
           coverPath: '',
-          coverUrl: '',
         );
       } else {
         // 未修改封面，只更新名称和描述
@@ -1668,7 +1647,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
           description: description.isEmpty ? null : description,
         );
       }
-
       if (mounted) {
         Navigator.of(context).pop(true);
       }
@@ -1690,9 +1668,7 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
         _coverMode != 'clear' &&
         (_coverMode == 'local' ||
             _coverMode == 'song' ||
-            widget.playlist.coverPath?.isNotEmpty == true ||
             widget.playlist.coverUrl?.isNotEmpty == true);
-
     return AlertDialog(
       title: Text(widget.playlist.isBuiltIn ? '修改封面' : '编辑歌单'),
       content: SingleChildScrollView(
@@ -1713,7 +1689,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
                 child: _buildCoverPreview(colorScheme),
               ),
               const SizedBox(height: 12),
-
               // 封面操作按钮
               Wrap(
                 spacing: 8,
@@ -1746,7 +1721,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
                 ],
               ),
               const SizedBox(height: 16),
-
               // 歌单名称
               TextField(
                 controller: _nameController,
@@ -1757,7 +1731,6 @@ class _PlaylistEditDialogState extends ConsumerState<_PlaylistEditDialog> {
                 enabled: !_isSaving && !widget.playlist.isBuiltIn,
               ),
               const SizedBox(height: 16),
-
               // 歌单描述
               TextField(
                 controller: _descController,

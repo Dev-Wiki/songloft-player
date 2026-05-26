@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/cover_url.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/song.dart';
 import '../../../../shared/utils/responsive_snackbar.dart';
@@ -229,10 +228,7 @@ class _DrawerSongItem extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     return Dismissible(
       key: ValueKey('dismiss_drawer_${song.id}_${song.type}_$index'),

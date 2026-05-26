@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/tv_theme.dart';
-import '../../../../core/utils/cover_url.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/tv_focusable.dart';
 import '../../domain/player_state.dart';
@@ -45,12 +44,8 @@ class _TvPlayerState extends ConsumerState<TvPlayer> {
     // 获取封面 URL
     String? coverUrl;
     if (state.hasSong) {
-      coverUrl = CoverUrl.buildCoverUrl(
-        coverUrl: state.currentSong!.coverUrl,
-        coverPath: state.currentSong!.coverPath,
-      );
+      coverUrl = state.currentSong!.coverUrl;
     }
-
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -978,10 +973,7 @@ class TvMiniPlayer extends ConsumerWidget {
     }
 
     final song = state.currentSong!;
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     return Container(
       height: 80,

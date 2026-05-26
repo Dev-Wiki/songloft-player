@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/utils/color_extraction.dart';
-import '../../../../core/utils/cover_url.dart';
 import '../../../../shared/widgets/favorite_button.dart';
 import '../../domain/player_state.dart';
 import '../providers/player_provider.dart';
@@ -120,10 +119,7 @@ class _MobilePlayerState extends ConsumerState<MobilePlayer>
     }
 
     final song = state.currentSong!;
-    final coverUrl = CoverUrl.buildCoverUrl(
-      coverUrl: song.coverUrl,
-      coverPath: song.coverPath,
-    );
+    final coverUrl = song.coverUrl;
 
     final paletteAsync = ref.watch(coverColorsProvider(coverUrl));
     final palette = paletteAsync.value;
