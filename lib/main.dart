@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, exit;
 import 'dart:ui';
 
 import 'package:audio_service/audio_service.dart';
@@ -29,14 +29,22 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows) {
-    await WindowsSingleInstance.ensureSingleInstance(
+    bool isFirstInstance = await WindowsSingleInstance.ensureSingleInstance(
       args,
       "songloft_player_instance",
       onSecondWindow: (List<String> args) {
-        windowManager.show();
-        windowManager.focus();
+        // 关键修复：必须异步执行窗口恢复操作。
+        // 因为底层插件是通过同步的 SendMessage 跨进程通信的。如果在回调里直接同步调用 windowManager（反向调用 Native），
+        // 会导致主线程的方法通道死锁，造成第一个进程卡死，第二个进程也无法走完 exit() 而残留后台。
+        Future.delayed(const Duration(milliseconds: 200), () async {
+          await windowManager.show();
+          await windowManager.focus();
+        });
       },
     );
+    if (!isFirstInstance) {
+      exit(0);
+    }
   }
 
   // Windows 和 Linux 平台需要 media_kit 作为 just_audio 的后端
@@ -45,8 +53,19 @@ void main(List<String> args) async {
     JustAudioMediaKit.ensureInitialized();
   }
 
-  // 初始化 Windows 系统托盘与拦截关闭事件
-  await WindowTrayManager.setup();
+  // Windows 和 Linux 平台配置托盘和窗口行为
+  if (Platform.isWindows || Platform.isLinux) {
+    await WindowTrayManager.setup();
+    
+    // 强制确保窗口在首次启动时显示
+    // 加入 windows_single_instance 后，可能会导致 Flutter 的默认首帧显示失效
+    if (Platform.isWindows) {
+      await windowManager.waitUntilReadyToShow(null, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
+  }
 
   // 全局异常处理，防止未捕获异常导致白屏
   FlutterError.onError = (FlutterErrorDetails details) {
