@@ -59,6 +59,30 @@ dev_dependencies:
   json_serializable: ^6.9.3
   custom_lint: ^0.8.1
   riverpod_lint: ^3.1.0
+  # Android launcher icon 生成器（其他平台仍由 scripts/generate-icons.sh 直接从 SVG 渲染）
+  flutter_launcher_icons: ^0.14.4
+
+# 接管 Android / iOS / macOS 原生图标。
+# Windows ICO（多分辨率 16-256）和 Web PWA 由 scripts/generate-icons.sh 直接从 SVG 渲染，
+# 这里 generate=false 避免被覆盖为单尺寸或丢失 maskable / 修改 manifest 颜色。
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  macos:
+    generate: true
+    image_path: "assets/icons/app_icon.png"
+  windows:
+    generate: false
+  web:
+    generate: false
+  image_path: "assets/icons/app_icon.png"
+  min_sdk_android: 21
+  # Adaptive icon (Android 8.0+)：白底 + 与主图相同的前景，自带 16% inset
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
+  # Themed icon (Android 13+)：单色版本，跟随系统壁纸主题
+  adaptive_icon_monochrome: "assets/icons/app_icon.png"
 
 flutter:
   uses-material-design: true
