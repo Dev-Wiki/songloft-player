@@ -15,6 +15,7 @@ import 'core/storage/secure_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/responsive.dart';
 import 'core/router/app_router.dart';
+import 'core/utils/window_tray_manager.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 
 /// 全局 AudioHandler Provider
@@ -30,6 +31,9 @@ void main() async {
   if (!kIsWeb) {
     JustAudioMediaKit.ensureInitialized();
   }
+
+  // 初始化 Windows 系统托盘与拦截关闭事件
+  await WindowTrayManager.setup();
 
   // 全局异常处理，防止未捕获异常导致白屏
   FlutterError.onError = (FlutterErrorDetails details) {

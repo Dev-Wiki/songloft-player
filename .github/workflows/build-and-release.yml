@@ -85,7 +85,7 @@ jobs:
       - name: Install Linux dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libglu1-mesa libstdc++-12-dev libsecret-1-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libglu1-mesa libstdc++-12-dev libsecret-1-dev libayatana-appindicator3-dev
           # 用于 DEB/RPM/AppImage 构建
           sudo apt-get install -y rpm patchelf
       - name: Install appimagetool
