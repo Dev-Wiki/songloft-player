@@ -176,7 +176,7 @@ class _JSPluginCard extends StatelessWidget {
       return;
     }
 
-    final url = '${AppConfig.baseUrl}/api/v1/jsplugin/${plugin.entryPath}';
+    final url = '${AppConfig.baseUrl}${AppConfig.basePath}/api/v1/jsplugin/${plugin.entryPath}';
 
     if (kIsWeb) {
       // Web 平台：使用 launchUrl 在新标签页打开

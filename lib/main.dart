@@ -64,6 +64,15 @@ void main(List<String> args) async {
     // 嵌入模式：Flutter Web 嵌入 Go 后端，直接使用当前页面的 origin 作为后端 API 地址
     // 两者同域，无需手动配置
     AppConfig.baseUrl = Uri.base.origin;
+    // 检测 <base href> 中的 sub-path（由 Go 服务端运行时注入）
+    final uriBasePath = Uri.base.path;
+    if (uriBasePath.length > 1) {
+      final trimmed = uriBasePath.endsWith('/')
+          ? uriBasePath.substring(0, uriBasePath.length - 1)
+          : uriBasePath;
+      AppConfig.basePath = trimmed;
+      AppConfig.apiPrefix = '$trimmed/api/v1';
+    }
   } else {
     // 独立部署模式：从本地存储恢复用户之前配置的 API 地址
     final prefs = await AppPreferences.create();

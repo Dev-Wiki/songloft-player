@@ -7,7 +7,8 @@ const String _kDeployMode =
 
 class AppConfig {
   static String baseUrl = 'http://localhost:58091';
-  static const String apiPrefix = '/api/v1';
+  static String apiPrefix = '/api/v1';
+  static String basePath = '';
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
 

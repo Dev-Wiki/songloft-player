@@ -23,10 +23,11 @@ class UrlHelper {
       return url;
     }
 
-    // 相对路径：拼接 baseUrl + access_token
+    // 相对路径：拼接 baseUrl + basePath + access_token
     final token = SecureStorageService.cachedAccessToken ?? '';
     final separator = url.contains('?') ? '&' : '?';
-    final fullUrl = '${AppConfig.baseUrl}$url${separator}access_token=$token';
+    final fullUrl =
+        '${AppConfig.baseUrl}${AppConfig.basePath}$url${separator}access_token=$token';
 
     debugPrint('[UrlHelper] Built resource URL: $fullUrl');
     return fullUrl;
