@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../config/constants.dart';
 import '../../features/library/presentation/providers/favorite_provider.dart';
 import '../utils/responsive_snackbar.dart';
 
-/// 收藏按钮组件
-/// 点击切换收藏状态，带有缩放动画效果
 class FavoriteButton extends ConsumerStatefulWidget {
-  /// 歌曲 ID
   final int songId;
-
-  /// 图标大小
+  final String songType;
   final double size;
-
-  /// 点击回调（可选，用于自定义处理逻辑）
   final void Function(bool isFavorited)? onToggle;
 
   const FavoriteButton({
     super.key,
     required this.songId,
+    this.songType = 'local',
     this.size = 24,
     this.onToggle,
   });
@@ -64,18 +60,23 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
     super.dispose();
   }
 
+  bool get _isRadio => widget.songType == AppConstants.songTypeRadio;
+
   Future<void> _toggleFavorite() async {
     if (_isLoading) return;
 
     setState(() => _isLoading = true);
     _animationController.forward(from: 0);
 
-    final isFavorited = ref.read(isSongFavoritedProvider(widget.songId));
+    final isFavorited = _isRadio
+        ? ref.read(isRadioFavoritedProvider(widget.songId))
+        : ref.read(isSongFavoritedProvider(widget.songId));
 
     try {
-      final newState = await ref
-          .read(favoriteProvider.notifier)
-          .toggleFavorite(widget.songId);
+      final notifier = ref.read(favoriteProvider.notifier);
+      final newState = _isRadio
+          ? await notifier.toggleRadioFavorite(widget.songId)
+          : await notifier.toggleFavorite(widget.songId);
 
       widget.onToggle?.call(newState);
 
@@ -102,7 +103,9 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
 
   @override
   Widget build(BuildContext context) {
-    final isFavorited = ref.watch(isSongFavoritedProvider(widget.songId));
+    final isFavorited = _isRadio
+        ? ref.watch(isRadioFavoritedProvider(widget.songId))
+        : ref.watch(isSongFavoritedProvider(widget.songId));
 
     return ScaleTransition(
       scale: _scaleAnimation,

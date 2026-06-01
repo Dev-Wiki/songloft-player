@@ -166,7 +166,7 @@ class DesktopPlayer extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
         // 收藏按钮
-        FavoriteButton(songId: song.id, size: 20),
+        FavoriteButton(songId: song.id, songType: song.type, size: 20),
       ],
     );
   }

@@ -394,7 +394,7 @@ class _DesktopFullPlayerState extends ConsumerState<DesktopFullPlayer>
           width: 48,
           height: 48,
           child: Center(
-            child: FavoriteButton(songId: state.currentSong!.id, size: 24),
+            child: FavoriteButton(songId: state.currentSong!.id, songType: state.currentSong!.type, size: 24),
           ),
         ),
         // 播放模式

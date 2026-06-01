@@ -230,7 +230,7 @@ class SongListTile extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FavoriteButton(songId: song.id, size: 20),
+        FavoriteButton(songId: song.id, songType: song.type, size: 20),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
           onSelected: (value) {
@@ -302,7 +302,7 @@ class SongListTile extends ConsumerWidget {
           onPressed: onTap,
           iconSize: 20,
         ),
-        FavoriteButton(songId: song.id, size: 20),
+        FavoriteButton(songId: song.id, songType: song.type, size: 20),
         if (song.type != AppConstants.songTypeLocal)
           IconButton(
             icon: const Icon(Icons.edit),
