@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - main      # push 到 main 自动打测试包（全平台 dev 构建 + main 的 prerelease）
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
   workflow_dispatch:
     inputs:
       build_web:
@@ -344,8 +350,9 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
             echo "make_latest=true" >> "$GITHUB_OUTPUT"
           else
+            # 分支触发（push to main / workflow_dispatch）统一用 dev tag 滚动 prerelease
             BRANCH="${GITHUB_REF#refs/heads/}"
-            echo "tag=$BRANCH" >> "$GITHUB_OUTPUT"
+            echo "tag=dev" >> "$GITHUB_OUTPUT"
             echo "name=Dev Build ($BRANCH)" >> "$GITHUB_OUTPUT"
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
             echo "make_latest=false" >> "$GITHUB_OUTPUT"
