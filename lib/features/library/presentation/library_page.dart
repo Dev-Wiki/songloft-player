@@ -172,10 +172,23 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     : () => _showBatchDeleteConfirmDialog(context),
           ),
           TextButton(
-            onPressed: () {
-              ref.read(songsListProvider.notifier).selectAll();
-            },
-            child: const Text('全选'),
+            onPressed: state.isSelectingAll
+                ? null
+                : () {
+                    ref.read(songsListProvider.notifier).toggleSelectAll();
+                  },
+            child: state.isSelectingAll
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    (state.total > 0 &&
+                            state.selectedSongIds.length >= state.total)
+                        ? '取消全选'
+                        : '全选',
+                  ),
           ),
         ],
       );

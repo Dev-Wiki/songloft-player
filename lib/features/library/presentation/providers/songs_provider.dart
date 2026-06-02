@@ -31,6 +31,7 @@ class SongsListState {
   final bool hasMore;
   final bool isSelectionMode;
   final Set<int> selectedSongIds;
+  final bool isSelectingAll;
 
   const SongsListState({
     this.songs = const [],
@@ -44,6 +45,7 @@ class SongsListState {
     this.hasMore = true,
     this.isSelectionMode = false,
     this.selectedSongIds = const {},
+    this.isSelectingAll = false,
   });
 
   SongsListState copyWith({
@@ -58,6 +60,7 @@ class SongsListState {
     bool? hasMore,
     bool? isSelectionMode,
     Set<int>? selectedSongIds,
+    bool? isSelectingAll,
     bool clearError = false,
     bool clearType = false,
   }) {
@@ -73,6 +76,7 @@ class SongsListState {
       hasMore: hasMore ?? this.hasMore,
       isSelectionMode: isSelectionMode ?? this.isSelectionMode,
       selectedSongIds: selectedSongIds ?? this.selectedSongIds,
+      isSelectingAll: isSelectingAll ?? this.isSelectingAll,
     );
   }
 }
@@ -199,10 +203,32 @@ class SongsListNotifier extends Notifier<SongsListState> {
     state = state.copyWith(selectedSongIds: {});
   }
 
-  /// 全选当前页面歌曲
-  void selectAll() {
-    final allIds = state.songs.map((s) => s.id).toSet();
-    state = state.copyWith(selectedSongIds: allIds);
+  /// 全选/取消全选：覆盖当前筛选条件下的全部歌曲（不仅是已加载的页）
+  /// - 已全选 → 清空
+  /// - 否则 → 调 /songs/ids 一次性拿到所有匹配 id
+  Future<void> toggleSelectAll() async {
+    if (state.isSelectingAll) return;
+
+    if (state.selectedSongIds.isNotEmpty &&
+        state.total > 0 &&
+        state.selectedSongIds.length >= state.total) {
+      state = state.copyWith(selectedSongIds: {});
+      return;
+    }
+
+    state = state.copyWith(isSelectingAll: true, clearError: true);
+    try {
+      final ids = await _repository.getSongIds(
+        type: state.type,
+        keyword: state.keyword.isNotEmpty ? state.keyword : null,
+      );
+      state = state.copyWith(
+        selectedSongIds: ids.toSet(),
+        isSelectingAll: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isSelectingAll: false, error: e.toString());
+    }
   }
 
   /// 删除歌曲
