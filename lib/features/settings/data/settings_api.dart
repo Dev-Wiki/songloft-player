@@ -127,4 +127,29 @@ class SettingsApi {
       throw ApiException.fromDioException(e);
     }
   }
+
+  // ---------- 日志等级（debug / info / warn / error） ----------
+
+  Future<String> getLogLevel() async {
+    try {
+      final response = await dio.get(
+        '${AppConfig.apiPrefix}/settings/log-level',
+      );
+      final data = response.data as Map<String, dynamic>;
+      return data['level'] as String? ?? 'info';
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> setLogLevel(String level) async {
+    try {
+      await dio.put(
+        '${AppConfig.apiPrefix}/settings/log-level',
+        data: {'level': level},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

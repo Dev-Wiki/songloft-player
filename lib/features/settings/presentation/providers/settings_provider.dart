@@ -337,6 +337,41 @@ final hlsProxyEnabledProvider =
     );
 
 // ============================================================================
+// 日志等级 Provider
+// ============================================================================
+
+/// 日志等级 Notifier。
+/// 业务端点：GET/PUT /api/v1/settings/log-level
+/// 取值：debug / info / warn / error；改后服务端运行时即时切换 slog 全局等级。
+class LogLevelNotifier extends AsyncNotifier<String> {
+  @override
+  Future<String> build() async {
+    final api = ref.watch(settingsApiProvider);
+    try {
+      return await api.getLogLevel();
+    } catch (_) {
+      return 'info';
+    }
+  }
+
+  Future<void> setValue(String value) async {
+    state = AsyncValue.data(value);
+    try {
+      final api = ref.read(settingsApiProvider);
+      await api.setLogLevel(value);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+}
+
+/// 日志等级 Provider
+final logLevelProvider = AsyncNotifierProvider<LogLevelNotifier, String>(
+  LogLevelNotifier.new,
+);
+
+// ============================================================================
 // Upgrade Progress Provider
 // ============================================================================
 

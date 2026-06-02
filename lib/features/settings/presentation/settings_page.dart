@@ -137,6 +137,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: '系统',
             icon: Icons.settings_outlined,
             children: [
+              _buildLogLevelTile(),
+              const Divider(height: 1),
               _buildServerVersionTile(),
               if (!AppConfig.isEmbedded) ...[
                 const Divider(height: 1),
@@ -466,6 +468,62 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ResponsiveSnackBar.showError(context, message: '保存失败: $e');
               }
             },
+    );
+  }
+
+  /// 日志等级选择（运行时动态切换 slog 全局等级）
+  Widget _buildLogLevelTile() {
+    final levelAsync = ref.watch(logLevelProvider);
+    final level = levelAsync.value ?? 'info';
+    const labels = {
+      'debug': 'Debug（详细，调试用）',
+      'info': 'Info（默认）',
+      'warn': 'Warn',
+      'error': 'Error（仅错误）',
+    };
+    return ListTile(
+      leading: const Icon(Icons.bug_report_outlined),
+      title: const Text('日志等级'),
+      subtitle: Text(labels[level] ?? level),
+      trailing: const Icon(Icons.chevron_right),
+      enabled: !levelAsync.isLoading,
+      onTap: () async {
+        final picked = await showDialog<String>(
+          context: context,
+          builder: (ctx) => SimpleDialog(
+            title: const Text('选择日志等级'),
+            children: [
+              RadioGroup<String>(
+                groupValue: level,
+                onChanged: (v) => Navigator.pop(ctx, v),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: labels.entries
+                      .map(
+                        (e) => RadioListTile<String>(
+                          title: Text(e.value),
+                          value: e.key,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+        if (picked == null || picked == level) return;
+        try {
+          await ref.read(logLevelProvider.notifier).setValue(picked);
+          if (!mounted) return;
+          ResponsiveSnackBar.show(
+            context,
+            message: '日志等级已切换为 ${labels[picked] ?? picked}',
+          );
+        } catch (e) {
+          if (!mounted) return;
+          ResponsiveSnackBar.showError(context, message: '切换失败: $e');
+        }
+      },
     );
   }
 
