@@ -11,6 +11,10 @@ import '../../../settings/presentation/providers/settings_provider.dart';
 import '../../data/jsplugin_api.dart';
 import '../providers/jsplugin_provider.dart';
 
+/// 官方插件源 URL
+const _kOfficialRegistryUrl =
+    'https://raw.githubusercontent.com/songloft-org/songloft-plugin-registry/main/registry.json';
+
 /// 预设 GitHub 代理列表
 const List<_ProxyOption> _kGithubProxies = [
   _ProxyOption(label: '直连 (不使用代理)', value: ''),
@@ -238,10 +242,40 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
                           .map(
                             (r) => DropdownMenuItem(
                               value: r,
-                              child: Text(
-                                r.name.isEmpty ? r.url : r.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      r.name.isEmpty ? r.url : r.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (r.url == _kOfficialRegistryUrl) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 1,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primaryContainer,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        '官方',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimaryContainer,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                           )
@@ -736,10 +770,40 @@ class _RegistryManagementDialogState
                           });
                         },
                       ),
-                      title: Text(
-                        r.name.isNotEmpty ? r.name : r.url,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      title: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              r.name.isNotEmpty ? r.name : r.url,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (r.url == _kOfficialRegistryUrl) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '官方',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       subtitle: r.name.isNotEmpty
                           ? Text(
