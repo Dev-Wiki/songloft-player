@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -21,17 +23,39 @@ class ServerProbe {
   static const Duration _defaultTimeout = Duration(milliseconds: 2500);
 
   /// 并行探测所有 entries 的 `/api/v1/health`，返回**列表索引最小**的可达项。
-  /// 全部失败返回 null。整体最长延迟 = timeout。
+  /// 全部失败返回 null。
+  /// 优化：一旦能确定最高优先级可达服务器即立即返回，无需等待低优先级探测完成。
   static Future<ServerEntry?> pickFirstReachable(
     List<ServerEntry> entries, {
     Duration timeout = _defaultTimeout,
   }) async {
     if (entries.isEmpty) return null;
-    final results = await probeAll(entries, timeout: timeout);
-    for (var i = 0; i < entries.length; i++) {
-      if (results[i].ok) return entries[i];
+
+    final n = entries.length;
+    final results = List<bool?>.filled(n, null);
+    final completer = Completer<ServerEntry?>();
+
+    void tryResolve() {
+      if (completer.isCompleted) return;
+      for (var i = 0; i < n; i++) {
+        if (results[i] == null) return;
+        if (results[i]!) {
+          completer.complete(entries[i]);
+          return;
+        }
+      }
+      completer.complete(null);
     }
-    return null;
+
+    for (var i = 0; i < n; i++) {
+      final idx = i;
+      probeOne(entries[idx], timeout: timeout).then((r) {
+        results[idx] = r.ok;
+        tryResolve();
+      });
+    }
+
+    return completer.future;
   }
 
   /// 并行探测所有 entries，返回与输入顺序对应的结果列表。

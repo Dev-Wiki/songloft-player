@@ -42,6 +42,9 @@ class _StartupGateState extends ConsumerState<StartupGate> {
 
       if (servers.isEmpty) {
         ref.read(probeOutcomeProvider.notifier).set(ProbeOutcome.noServers);
+      } else if (servers.length == 1) {
+        ref.read(baseUrlProvider.notifier).set(servers.first.url);
+        ref.read(probeOutcomeProvider.notifier).set(ProbeOutcome.success);
       } else {
         setState(() {
           _hint = '正在连接 ${_describe(servers.first)}…';
@@ -82,7 +85,7 @@ class _StartupGateState extends ConsumerState<StartupGate> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.music_note, size: 64),
+              Image.asset('assets/icons/app_icon.png', width: 64, height: 64),
               const SizedBox(height: 24),
               const CircularProgressIndicator(),
               const SizedBox(height: 24),

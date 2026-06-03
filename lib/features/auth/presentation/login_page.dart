@@ -415,8 +415,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           width: 160,
           height: 160,
           decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
                 color: colorScheme.primary.withValues(alpha: 0.3),
@@ -425,11 +423,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
             ],
           ),
-          child: Icon(
-            Icons.music_note_rounded,
-            size: 96,
-            color: colorScheme.onPrimaryContainer,
-          ),
+          child: Image.asset('assets/icons/app_icon.png', width: 160, height: 160),
         ),
         const SizedBox(height: 40),
         Text(
@@ -619,19 +613,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Column(
       children: [
         // Logo
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(
-            Icons.music_note_rounded,
-            size: 48,
-            color: colorScheme.onPrimaryContainer,
-          ),
-        ),
+        Image.asset('assets/icons/app_icon.png', width: 80, height: 80),
         const SizedBox(height: 24),
         Text(
           'Songloft',
