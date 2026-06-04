@@ -1040,11 +1040,17 @@ class PlayerNotifier extends Notifier<PlayerState> {
   /// [keyword] 搜索关键词（可选）
   /// [type] 歌曲类型筛选（可选）
   /// 返回总歌曲数（-1 表示失败）
-  Future<int> playAllSongs({String? keyword, String? type}) async {
+  Future<int> playAllSongs({
+    String? keyword,
+    String? type,
+    int startIndex = 0,
+  }) async {
     final songsApi = ref.read(songsApiProvider);
     const firstPageLimit = 10;
 
-    debugPrint('[Player] playAllSongs: start, keyword=$keyword, type=$type');
+    debugPrint(
+      '[Player] playAllSongs: start, keyword=$keyword, type=$type, startIndex=$startIndex',
+    );
     _consecutiveFailures = 0;
     try {
       final firstPageResponse = await songsApi.getSongs(
@@ -1066,7 +1072,8 @@ class PlayerNotifier extends Notifier<PlayerState> {
       }
 
       // playPlaylist 内部会递增 _loadGeneration，取消之前的后台加载
-      await playPlaylist(firstPageSongs);
+      final safeStartIndex = startIndex.clamp(0, firstPageSongs.length - 1);
+      await playPlaylist(firstPageSongs, startIndex: safeStartIndex);
 
       if (total > firstPageSongs.length) {
         // 记录当前代次，传给后台加载任务用于检测是否过期
@@ -1181,6 +1188,28 @@ class PlayerNotifier extends Notifier<PlayerState> {
         ' (generation=$generation): $e\n$st',
       );
     }
+  }
+
+  /// 后台加载剩余歌曲追加到当前播放列表（供 library 页面点击单曲后补全队列）
+  void loadRemainingSongsForCurrentPlaylist({
+    String? keyword,
+    String? type,
+    required int loadedCount,
+    required int total,
+  }) {
+    final songsApi = ref.read(songsApiProvider);
+    final generation = _loadGeneration;
+    debugPrint(
+      '[Player] loadRemainingSongsForCurrentPlaylist: offset=$loadedCount, total=$total, generation=$generation',
+    );
+    _loadRemainingSongsByFilter(
+      songsApi,
+      keyword,
+      type,
+      loadedCount,
+      total,
+      generation,
+    );
   }
 
   /// 切换全屏播放器

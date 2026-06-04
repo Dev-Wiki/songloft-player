@@ -329,7 +329,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           index: index,
           isSelected: state.selectedSongIds.contains(song.id),
           isSelectionMode: state.isSelectionMode,
-          onTap: () => _onSongTap(song),
+          onTap: () => _onSongTap(song, index),
           onSelect: () {
             ref.read(songsListProvider.notifier).toggleSongSelection(song.id);
           },
@@ -458,7 +458,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     isSelected: state.selectedSongIds.contains(song.id),
                     isSelectionMode: state.isSelectionMode,
                     isNarrow: isNarrow,
-                    onTap: () => _onSongTap(song),
+                    onTap: () => _onSongTap(song, index),
                     onSelect: () {
                       ref
                           .read(songsListProvider.notifier)
@@ -513,8 +513,18 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     );
   }
 
-  void _onSongTap(Song song) {
-    ref.read(playerStateProvider.notifier).playSong(song);
+  void _onSongTap(Song song, int index) {
+    final state = ref.read(songsListProvider);
+    final notifier = ref.read(playerStateProvider.notifier);
+    notifier.playPlaylist(state.songs, startIndex: index);
+    if (state.hasMore) {
+      notifier.loadRemainingSongsForCurrentPlaylist(
+        keyword: state.keyword,
+        type: state.type,
+        loadedCount: state.songs.length,
+        total: state.total,
+      );
+    }
   }
 
   void _navigateToAddSong(BuildContext context, String songType) async {
