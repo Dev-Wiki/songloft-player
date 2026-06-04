@@ -372,6 +372,41 @@ final logLevelProvider = AsyncNotifierProvider<LogLevelNotifier, String>(
 );
 
 // ============================================================================
+// HTTP 代理 Provider
+// ============================================================================
+
+/// HTTP 代理 Notifier。
+/// 全局 HTTP 代理地址，所有后端外发请求通过此代理转发。
+/// 业务端点：GET/PUT /api/v1/settings/http-proxy
+class HttpProxyNotifier extends AsyncNotifier<String> {
+  @override
+  Future<String> build() async {
+    final api = ref.watch(settingsApiProvider);
+    try {
+      return await api.getHttpProxy();
+    } catch (_) {
+      return '';
+    }
+  }
+
+  Future<void> setValue(String value) async {
+    state = AsyncValue.data(value);
+    try {
+      final api = ref.read(settingsApiProvider);
+      await api.setHttpProxy(value);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+}
+
+/// HTTP 代理 Provider
+final httpProxyProvider = AsyncNotifierProvider<HttpProxyNotifier, String>(
+  HttpProxyNotifier.new,
+);
+
+// ============================================================================
 // Upgrade Progress Provider
 // ============================================================================
 

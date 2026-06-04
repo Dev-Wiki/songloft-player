@@ -137,6 +137,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: '系统',
             icon: Icons.settings_outlined,
             children: [
+              _buildHttpProxyTile(),
+              const Divider(height: 1),
               _buildLogLevelTile(),
               const Divider(height: 1),
               _buildServerVersionTile(),
@@ -489,6 +491,76 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ResponsiveSnackBar.showError(context, message: '保存失败: $e');
               }
             },
+    );
+  }
+
+  /// HTTP 代理设置
+  Widget _buildHttpProxyTile() {
+    final proxyAsync = ref.watch(httpProxyProvider);
+    final proxy = proxyAsync.value ?? '';
+
+    return ListTile(
+      leading: const Icon(Icons.vpn_lock_outlined),
+      title: const Text('HTTP 代理'),
+      subtitle: Text(proxy.isEmpty ? '未配置（直连）' : proxy),
+      trailing: const Icon(Icons.chevron_right),
+      enabled: !proxyAsync.isLoading,
+      onTap: () async {
+        final controller = TextEditingController(text: proxy);
+        final result = await showDialog<String>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('HTTP 代理'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('设置全局 HTTP 代理，所有后端外发请求（插件下载、升级检查等）将通过此代理转发。留空则直连。'),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    labelText: '代理地址',
+                    hintText: 'http://192.168.1.1:7890',
+                    helperText: '支持 HTTP/HTTPS/SOCKS5 代理',
+                    helperMaxLines: 2,
+                    border: OutlineInputBorder(),
+                  ),
+                  autofocus: true,
+                  onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('取消'),
+              ),
+              if (proxy.isNotEmpty)
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, ''),
+                  child: const Text('清除'),
+                ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+                child: const Text('保存'),
+              ),
+            ],
+          ),
+        );
+        if (result == null || result == proxy) return;
+        try {
+          await ref.read(httpProxyProvider.notifier).setValue(result);
+          if (!mounted) return;
+          ResponsiveSnackBar.show(
+            context,
+            message: result.isEmpty ? '已清除 HTTP 代理' : 'HTTP 代理已设置为 $result',
+          );
+        } catch (e) {
+          if (!mounted) return;
+          ResponsiveSnackBar.showError(context, message: '保存失败: $e');
+        }
+      },
     );
   }
 

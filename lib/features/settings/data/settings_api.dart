@@ -223,4 +223,29 @@ class SettingsApi {
       throw ApiException.fromDioException(e);
     }
   }
+
+  // ---------- HTTP 代理 ----------
+
+  Future<String> getHttpProxy() async {
+    try {
+      final response = await dio.get(
+        '${AppConfig.apiPrefix}/settings/http-proxy',
+      );
+      final data = response.data as Map<String, dynamic>;
+      return data['proxy'] as String? ?? '';
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> setHttpProxy(String proxy) async {
+    try {
+      await dio.put(
+        '${AppConfig.apiPrefix}/settings/http-proxy',
+        data: {'proxy': proxy},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }
