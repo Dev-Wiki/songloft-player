@@ -263,7 +263,6 @@ class _DesktopFullPlayerState extends ConsumerState<DesktopFullPlayer>
                         Expanded(
                           flex: 5,
                           child: LyricsView(
-                            lyricUrl: song.lyricUrl,
                             currentPosition: state.currentTime,
                             onSeek: notifier.seek,
                             song: song,

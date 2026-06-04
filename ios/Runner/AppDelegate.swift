@@ -12,5 +12,9 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    guard let controller = window?.rootViewController as? FlutterViewController else { return }
+    let messenger = controller.binaryMessenger
+    LiveActivityManager.shared.register(with: messenger)
   }
 }

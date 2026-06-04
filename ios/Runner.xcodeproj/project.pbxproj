@@ -17,6 +17,12 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		D71C72427FEF5D38612C4118 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2210930F76E752D8FF57F2E9 /* Pods_RunnerTests.framework */; };
+		B2E4516EF54414FD1B67CA97 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9696852CBAA00AAC64333330 /* LiveActivityManager.swift */; };
+		1C9486310C7849E245C00E29 /* SongloftMusicAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D8DABF3971B81F4C4DCB69F /* SongloftMusicAttributes.swift */; };
+		0679C9CAEAD9D3899AB3C416 /* SongloftLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67706DF2A7C12721D9D732F4 /* SongloftLiveActivityBundle.swift */; };
+		A9917055B5D12C4931DB4FF8 /* SongloftLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085C5BD3D26D80C7A1B76626 /* SongloftLiveActivityWidget.swift */; };
+		B9397FE54B9C33EB37C7EC33 /* SongloftMusicAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D8DABF3971B81F4C4DCB69F /* SongloftMusicAttributes.swift */; };
+		9002AF41380C05DE18E5E41E /* SongloftLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 54DBE75737E76300EECBF1EF /* SongloftLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +32,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		CF71A4EFD03836D8D64A3034 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2A54A536F60B30FCB330C93;
+			remoteInfo = SongloftLiveActivity;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -38,6 +51,17 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1984870C2FB6CFA501EE6581 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9002AF41380C05DE18E5E41E /* SongloftLiveActivity.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -67,6 +91,12 @@
 		E68BDEE233A3D4A69CDBF677 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		F91B5B990651D3B48795A69A /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		FC1E3C7743BBA45DF1759067 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
+		9696852CBAA00AAC64333330 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		6D8DABF3971B81F4C4DCB69F /* SongloftMusicAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongloftMusicAttributes.swift; sourceTree = "<group>"; };
+		54DBE75737E76300EECBF1EF /* SongloftLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SongloftLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		67706DF2A7C12721D9D732F4 /* SongloftLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongloftLiveActivityBundle.swift; sourceTree = "<group>"; };
+		085C5BD3D26D80C7A1B76626 /* SongloftLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongloftLiveActivityWidget.swift; sourceTree = "<group>"; };
+		4D0753C0E44B38039FF03628 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +113,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				093E73F6655C99FE5FDB7AFE /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		05C560FD0831C2CCABB71D42 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +175,7 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
+				AF4A7893EF7C50F331B5192D /* SongloftLiveActivity */,
 				341BA1950B8AD25FD0CB42A2 /* Pods */,
 				54989D82A8E42CA6FCCCEAE0 /* Frameworks */,
 			);
@@ -148,6 +186,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				54DBE75737E76300EECBF1EF /* SongloftLiveActivity.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -164,8 +203,20 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				9696852CBAA00AAC64333330 /* LiveActivityManager.swift */,
+				6D8DABF3971B81F4C4DCB69F /* SongloftMusicAttributes.swift */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		AF4A7893EF7C50F331B5192D /* SongloftLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				67706DF2A7C12721D9D732F4 /* SongloftLiveActivityBundle.swift */,
+				085C5BD3D26D80C7A1B76626 /* SongloftLiveActivityWidget.swift */,
+				4D0753C0E44B38039FF03628 /* Info.plist */,
+			);
+			path = SongloftLiveActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -200,6 +251,7 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				1984870C2FB6CFA501EE6581 /* Embed App Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				8F293CD53D90E1315145224A /* [CP] Embed Pods Frameworks */,
 				5AEF211E109AB2C6D77C8F56 /* [CP] Copy Pods Resources */,
@@ -212,6 +264,23 @@
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		B2A54A536F60B30FCB330C93 /* SongloftLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 140B4711B42A5DF9D7DC6254 /* Build configuration list for PBXNativeTarget "SongloftLiveActivity" */;
+			buildPhases = (
+				0350F1DD75F334E5864F5851 /* Sources */,
+				925BC58850977BA2553DB296 /* Resources */,
+				05C560FD0831C2CCABB71D42 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SongloftLiveActivity;
+			productName = SongloftLiveActivity;
+			productReference = 54DBE75737E76300EECBF1EF /* SongloftLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -226,6 +295,9 @@
 					331C8080294A63A400263BE5 = {
 						CreatedOnToolsVersion = 14.0;
 						TestTargetID = 97C146ED1CF9000F007C117D;
+					};
+					B2A54A536F60B30FCB330C93 = {
+						CreatedOnToolsVersion = 15.1;
 					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -268,6 +340,13 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		925BC58850977BA2553DB296 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +480,18 @@
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
+				B2E4516EF54414FD1B67CA97 /* LiveActivityManager.swift in Sources */,
+				1C9486310C7849E245C00E29 /* SongloftMusicAttributes.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0350F1DD75F334E5864F5851 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0679C9CAEAD9D3899AB3C416 /* SongloftLiveActivityBundle.swift in Sources */,
+				A9917055B5D12C4931DB4FF8 /* SongloftLiveActivityWidget.swift in Sources */,
+				B9397FE54B9C33EB37C7EC33 /* SongloftMusicAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -411,6 +502,11 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		401A0194E2AACD8172951393 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2A54A536F60B30FCB330C93 /* SongloftLiveActivity */;
+			targetProxy = CF71A4EFD03836D8D64A3034 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -714,6 +810,86 @@
 			};
 			name = Release;
 		};
+		3A1F1D9EBB9CE20E9E0749BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V38CGL92VW;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SongloftLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Songloft Live Activity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.songloft.songloftFlutter.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6AAA96572A5EE0DFC288702C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V38CGL92VW;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SongloftLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Songloft Live Activity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.songloft.songloftFlutter.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4836349A125047BC5CAEE991 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V38CGL92VW;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SongloftLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Songloft Live Activity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.songloft.songloftFlutter.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -743,6 +919,16 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		140B4711B42A5DF9D7DC6254 /* Build configuration list for PBXNativeTarget "SongloftLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A1F1D9EBB9CE20E9E0749BE /* Debug */,
+				6AAA96572A5EE0DFC288702C /* Release */,
+				4836349A125047BC5CAEE991 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

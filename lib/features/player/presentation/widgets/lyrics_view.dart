@@ -1,36 +1,28 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/storage/lyric_cache_service.dart';
-import '../../../../core/utils/url_helper.dart';
 import '../../../../shared/models/song.dart';
-import '../../domain/lyric_parser.dart';
 import '../lyric_adjust_page.dart';
+import '../providers/lyric_provider.dart';
 
 /// 歌词显示组件
 ///
-/// 支持自动滚动到当前歌词行，高亮显示当前行。
-/// 用户手动滚动时会暂停自动滚动，几秒后自动恢复。
+/// 从 [lyricStateProvider] 消费歌词状态，自动滚动到当前行并高亮显示。
+/// 用户手动滚动时暂停自动滚动，几秒后自动恢复。
 /// 点击歌词行可跳转到对应时间点播放。
-///
-/// 通过 [lyricUrl] 从网络加载歌词（后端统一端点 /api/v1/songs/{id}/lyric）。
 ///
 /// 当 [editable] 为 true 且 [song] 是本地歌曲时，右上角显示「调整」按钮，
 /// 点击进入 LyricAdjustPage 编辑歌词时间戳。保存后会自动重新拉取歌词。
-class LyricsView extends StatefulWidget {
-  /// 歌词URL（后端统一端点，相对路径）
-  final String? lyricUrl;
-
-  /// 当前播放位置
+class LyricsView extends ConsumerStatefulWidget {
+  /// 当前播放位置（仍需接收，用于歌词行点击 seek）
   final Duration currentPosition;
 
   /// 点击歌词行时的回调，传入被点击行的时间点
   final ValueChanged<Duration>? onSeek;
 
-  /// 关联的歌曲对象。仅当 [editable] 为 true 时用于决定是否展示「调整」按钮，
-  /// 以及把当前歌曲传给 LyricAdjustPage。
+  /// 关联的歌曲对象。仅当 [editable] 为 true 时用于决定是否展示「调整」按钮。
   final Song? song;
 
   /// 是否允许编辑歌词。即使为 true，也只有 song.type == 'local' 才会显示按钮。
@@ -38,7 +30,6 @@ class LyricsView extends StatefulWidget {
 
   const LyricsView({
     super.key,
-    this.lyricUrl,
     required this.currentPosition,
     this.onSeek,
     this.song,
@@ -46,63 +37,23 @@ class LyricsView extends StatefulWidget {
   });
 
   @override
-  State<LyricsView> createState() => _LyricsViewState();
+  ConsumerState<LyricsView> createState() => _LyricsViewState();
 }
 
-class _LyricsViewState extends State<LyricsView> {
-  /// 滚动控制器
+class _LyricsViewState extends ConsumerState<LyricsView> {
   final ScrollController _scrollController = ScrollController();
 
-  /// 解析后的歌词列表
-  List<LyricLine> _lyrics = [];
-
-  /// 当前高亮的歌词行索引
-  int _currentLineIndex = -1;
-
-  /// 是否正在用户手动滚动
   bool _isUserScrolling = false;
-
-  /// 恢复自动滚动的定时器
   Timer? _resumeTimer;
+  int _lastScrolledIndex = -1;
 
-  /// 每行歌词的估算高度
   static const double _lineHeight = 48.0;
-
-  /// 用户手动滚动后恢复自动滚动的延迟时间
   static const Duration _resumeDelay = Duration(seconds: 3);
-
-  /// 网络加载状态
-  bool _isLoadingFromUrl = false;
-
-  /// 网络加载失败
-  bool _loadFailed = false;
-
-  /// 从网络加载到的歌词文本
-  String? _fetchedLyricText;
-
-  /// 上一次加载的 URL（用于避免重复请求）
-  String? _lastFetchedUrl;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _initLyrics();
-  }
-
-  @override
-  void didUpdateWidget(LyricsView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // 歌词URL变化时重新处理
-    if (widget.lyricUrl != oldWidget.lyricUrl) {
-      _initLyrics();
-    }
-
-    // 播放位置变化时更新高亮行并滚动
-    if (widget.currentPosition != oldWidget.currentPosition) {
-      _updateCurrentLine();
-    }
   }
 
   @override
@@ -113,128 +64,6 @@ class _LyricsViewState extends State<LyricsView> {
     super.dispose();
   }
 
-  /// 初始化歌词：从 lyricUrl 加载
-  void _initLyrics() {
-    if (widget.lyricUrl != null && widget.lyricUrl!.isNotEmpty) {
-      // 有 lyricUrl，从网络加载（后端统一端点）
-      if (_lastFetchedUrl == widget.lyricUrl && _fetchedLyricText != null) {
-        // 同一个 URL 且已成功加载过，直接使用缓存
-        _parseLyrics(_fetchedLyricText);
-      } else {
-        _fetchLyricFromUrl(widget.lyricUrl!);
-      }
-    } else {
-      // 无 lyricUrl，显示空状态
-      _isLoadingFromUrl = false;
-      _loadFailed = false;
-      _fetchedLyricText = null;
-      _lastFetchedUrl = null;
-      _lyrics = [];
-      _currentLineIndex = -1;
-    }
-  }
-
-  /// 从网络加载歌词（集成本地缓存）
-  Future<void> _fetchLyricFromUrl(String lyricUrl) async {
-    // 1. 先查本地缓存
-    final cached = await LyricCacheService().get(lyricUrl);
-    if (cached != null) {
-      _fetchedLyricText = cached;
-      _lastFetchedUrl = lyricUrl;
-      if (mounted) {
-        setState(() {
-          _isLoadingFromUrl = false;
-          _loadFailed = false;
-        });
-      }
-      _parseLyrics(cached);
-      return;
-    }
-
-    setState(() {
-      _isLoadingFromUrl = true;
-      _loadFailed = false;
-      _lyrics = [];
-      _currentLineIndex = -1;
-    });
-
-    try {
-      // UrlHelper 自动处理：相对路径拼 baseUrl + access_token，外链原样返回
-      final fullUrl = UrlHelper.buildLyricUrl(lyricUrl);
-      // 后端 /api/v1/songs/{id}/lyric 直接返回 LyricPayload:
-      //   {"lyric":"...","tlyric":"...","rlyric":"...","lxlyric":"..."}
-      final response = await Dio().get<Map<String, dynamic>>(fullUrl);
-
-      if (!mounted) return;
-
-      final body = response.data;
-      String lyricText = '';
-      if (body is Map<String, dynamic>) {
-        final main = body['lyric'];
-        if (main is String) {
-          lyricText = main;
-        }
-      }
-
-      _fetchedLyricText = lyricText;
-      _lastFetchedUrl = lyricUrl;
-      setState(() {
-        _isLoadingFromUrl = false;
-        _loadFailed = false;
-      });
-      _parseLyrics(lyricText);
-
-      if (lyricText.isNotEmpty) {
-        await LyricCacheService().put(lyricUrl, lyricText);
-      }
-    } catch (e) {
-      debugPrint('[LyricsView] Failed to load lyric from URL: $e');
-      if (!mounted) return;
-      setState(() {
-        _isLoadingFromUrl = false;
-        _loadFailed = true;
-      });
-    }
-  }
-
-  /// 解析歌词
-  void _parseLyrics(String? lyricText) {
-    if (lyricText == null || lyricText.isEmpty) {
-      _lyrics = [];
-      _currentLineIndex = -1;
-      if (mounted) setState(() {});
-      return;
-    }
-
-    _lyrics = LyricParser.parse(lyricText);
-    _currentLineIndex = -1;
-    _updateCurrentLine();
-    if (mounted) setState(() {});
-  }
-
-  /// 更新当前歌词行
-  void _updateCurrentLine() {
-    final newIndex = LyricParser.findCurrentLine(
-      _lyrics,
-      widget.currentPosition,
-    );
-    if (newIndex != _currentLineIndex) {
-      setState(() {
-        _currentLineIndex = newIndex;
-      });
-
-      // 如果不是用户手动滚动，自动滚动到当前行
-      if (!_isUserScrolling && newIndex >= 0) {
-        _scrollToLine(newIndex);
-      }
-    }
-  }
-
-  /// 滚动到指定歌词行
-  ///
-  /// 配合下方 ListView 使用 `(viewportHeight - _lineHeight) / 2` 的上下 padding，
-  /// 索引 i 行的中心刚好位于 offset = `i * _lineHeight` + viewport 中线处，
-  /// 因此目标 offset 直接等于 `index * _lineHeight`，首尾行也能居中。
   void _scrollToLine(int index) {
     if (!_scrollController.hasClients) return;
 
@@ -251,43 +80,38 @@ class _LyricsViewState extends State<LyricsView> {
     );
   }
 
-  /// 监听滚动事件
   void _onScroll() {
-    // 检测用户是否正在手动滚动
     if (_scrollController.position.isScrollingNotifier.value) {
       _onUserScrollStart();
     }
   }
 
-  /// 用户开始手动滚动
   void _onUserScrollStart() {
     _isUserScrolling = true;
     _resumeTimer?.cancel();
     _resumeTimer = Timer(_resumeDelay, _onResumeAutoScroll);
   }
 
-  /// 恢复自动滚动
   void _onResumeAutoScroll() {
     _isUserScrolling = false;
-    // 立即滚动到当前行
-    if (_currentLineIndex >= 0) {
-      _scrollToLine(_currentLineIndex);
+    final lyricState = ref.read(lyricStateProvider);
+    if (lyricState.currentIndex >= 0) {
+      _scrollToLine(lyricState.currentIndex);
     }
   }
 
-  /// 是否应展示「调整」按钮：开启了 editable、有 song、是本地歌曲、且当前已成功加载到歌词
   bool get _shouldShowEditButton {
     if (!widget.editable) return false;
     final s = widget.song;
     if (s == null || s.type != 'local') return false;
-    return _lyrics.isNotEmpty && !_isLoadingFromUrl && !_loadFailed;
+    final lyricState = ref.read(lyricStateProvider);
+    return lyricState.hasLyrics && !lyricState.isLoading && !lyricState.loadFailed;
   }
 
-  /// 进入歌词调整页；保存成功（pop 返回 true）后强制重新拉取歌词，
-  /// 让 _initLyrics 走 fetch 分支拿到调整后的内容。
   Future<void> _openAdjustPage() async {
     final song = widget.song;
-    final lyricText = _fetchedLyricText;
+    final lyricState = ref.read(lyricStateProvider);
+    final lyricText = lyricState.rawLyricText;
     if (song == null || lyricText == null || lyricText.isEmpty) return;
 
     final saved = await Navigator.of(context).push<bool>(
@@ -300,21 +124,16 @@ class _LyricsViewState extends State<LyricsView> {
     );
 
     if (saved == true && mounted) {
-      // 重置内部缓存指针，让 _initLyrics 重新走 fetch 拿最新文本
-      setState(() {
-        _fetchedLyricText = null;
-        _lastFetchedUrl = null;
-      });
-      _initLyrics();
+      ref.read(lyricStateProvider.notifier).invalidate();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final lyricState = ref.watch(lyricStateProvider);
 
-    // 正在从网络加载歌词
-    if (_isLoadingFromUrl) {
+    if (lyricState.isLoading) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -341,8 +160,7 @@ class _LyricsViewState extends State<LyricsView> {
       );
     }
 
-    // 网络加载失败
-    if (_loadFailed) {
+    if (lyricState.loadFailed) {
       return Center(
         child: Text(
           '歌词加载失败',
@@ -353,8 +171,7 @@ class _LyricsViewState extends State<LyricsView> {
       );
     }
 
-    // 无歌词时显示占位
-    if (_lyrics.isEmpty) {
+    if (!lyricState.hasLyrics) {
       return Center(
         child: Text(
           '暂无歌词',
@@ -365,15 +182,26 @@ class _LyricsViewState extends State<LyricsView> {
       );
     }
 
+    // 当行索引变化时自动滚动
+    final currentIndex = lyricState.currentIndex;
+    if (currentIndex != _lastScrolledIndex && !_isUserScrolling && currentIndex >= 0) {
+      _lastScrolledIndex = currentIndex;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_isUserScrolling) {
+          _scrollToLine(currentIndex);
+        }
+      });
+    }
+
+    final lyrics = lyricState.lyrics;
+
     final body = LayoutBuilder(
       builder: (context, constraints) {
-        // 上下 padding = (视口高度 - 行高) / 2，让任意一行（含首尾）都能滚到视图正中央
         final verticalPadding = ((constraints.maxHeight - _lineHeight) / 2)
             .clamp(0.0, double.infinity);
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) {
             if (notification is ScrollStartNotification) {
-              // 用户开始滚动
               if (notification.dragDetails != null) {
                 _onUserScrollStart();
               }
@@ -386,17 +214,15 @@ class _LyricsViewState extends State<LyricsView> {
               vertical: verticalPadding,
               horizontal: 24,
             ),
-            itemCount: _lyrics.length,
+            itemCount: lyrics.length,
             itemBuilder: (context, index) {
-              final lyric = _lyrics[index];
-              final isCurrent = index == _currentLineIndex;
+              final lyric = lyrics[index];
+              final isCurrent = index == currentIndex;
 
               return GestureDetector(
                 onTap: () {
-                  // 点击歌词行跳转到对应时间点
                   if (widget.onSeek != null) {
                     widget.onSeek!(lyric.time);
-                    // 恢复自动滚动状态
                     _isUserScrolling = false;
                     _resumeTimer?.cancel();
                   }
@@ -431,7 +257,6 @@ class _LyricsViewState extends State<LyricsView> {
 
     if (!_shouldShowEditButton) return body;
 
-    // 在歌词列表右上角浮一个调整按钮
     return Stack(
       children: [
         Positioned.fill(child: body),

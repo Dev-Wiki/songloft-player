@@ -235,7 +235,6 @@ class _MobilePlayerState extends ConsumerState<MobilePlayer>
                             ),
                             // 页面2：歌词
                             LyricsView(
-                              lyricUrl: song.lyricUrl,
                               currentPosition: state.currentTime,
                               onSeek: notifier.seek,
                               song: song,

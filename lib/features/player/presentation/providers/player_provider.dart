@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart' as ja;
 import 'package:volume_controller/volume_controller.dart';
 
 import '../../../../core/audio/audio_service.dart';
+import '../../../../core/platform/live_activity_service.dart';
 import '../../../../core/storage/app_preferences.dart';
 import '../../../../core/utils/audio_format_helper.dart';
 import '../../../../core/utils/platform_utils.dart';
@@ -23,6 +24,7 @@ import '../../../library/presentation/providers/songs_provider.dart';
 import '../../../playlist/data/playlist_api.dart';
 import '../../../playlist/presentation/providers/playlist_provider.dart';
 import '../../domain/player_state.dart';
+import 'lyric_provider.dart';
 
 /// 播放器状态 Provider
 final playerStateProvider = NotifierProvider<PlayerNotifier, PlayerState>(
@@ -95,6 +97,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
     };
 
     _initListeners();
+    _initLiveActivityListeners();
     ref.onDispose(() {
       _positionSubscription?.cancel();
       _durationSubscription?.cancel();
@@ -105,6 +108,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
       _prefetchCancelToken?.cancel('disposed');
       _saveDebounceTimer?.cancel();
       _positionSaveTimer?.cancel();
+      LiveActivityService().endActivity();
     });
 
     // 从本地存储加载音量和播放模式设置
@@ -261,6 +265,44 @@ class PlayerNotifier extends Notifier<PlayerState> {
         }
       });
     }
+  }
+
+  /// 初始化 Live Activity 监听
+  void _initLiveActivityListeners() {
+    final liveActivity = LiveActivityService();
+
+    ref.listen(
+      lyricStateProvider.select((s) => s.currentIndex),
+      (prev, next) {
+        if (prev == next) return;
+        final lyricState = ref.read(lyricStateProvider);
+        liveActivity.updateLyric(
+          lyricState.currentLyricText,
+          lyricState.nextLyricText,
+        );
+      },
+    );
+
+    ref.listen(playerStateProvider.select((s) => s.currentSong), (prev, next) {
+      if (next == null) {
+        liveActivity.endActivity();
+      } else if (prev?.id != next.id) {
+        liveActivity.startActivity(
+          title: next.title,
+          artist: next.artist ?? '',
+          artUrl: next.coverUrl != null
+              ? UrlHelper.buildCoverUrl(next.coverUrl!)
+              : null,
+        );
+      }
+    });
+
+    ref.listen(playerStateProvider.select((s) => s.isPlaying), (prev, next) {
+      liveActivity.updatePlaybackState(
+        isPlaying: next,
+        progress: state.progress,
+      );
+    });
   }
 
   /// 歌曲播放完成处理
