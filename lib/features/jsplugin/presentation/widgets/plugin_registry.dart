@@ -52,7 +52,6 @@ class _PluginRegistryDialog extends ConsumerStatefulWidget {
 class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
   List<PluginRegistryConfig> _registries = [];
   PluginRegistryConfig? _selectedRegistry;
-  String _selectedProxy = '';
   String _searchText = '';
   int _currentPage = 1;
   static const int _pageSize = 20;
@@ -61,6 +60,20 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
   bool _loadingPlugins = false;
   RegistryRefreshResponse? _pluginResponse;
   String? _pluginError;
+
+  int _selectedProxyIndex = 0;
+  final TextEditingController _customProxyController = TextEditingController();
+
+  String get _effectiveProxy {
+    if (_selectedProxyIndex == -1) {
+      return _customProxyController.text.trim();
+    }
+    if (_selectedProxyIndex >= 0 &&
+        _selectedProxyIndex < _kGithubProxies.length) {
+      return _kGithubProxies[_selectedProxyIndex].value;
+    }
+    return '';
+  }
 
   final _searchController = TextEditingController();
   Timer? _searchDebounce;
@@ -74,6 +87,7 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
   @override
   void dispose() {
     _searchController.dispose();
+    _customProxyController.dispose();
     _searchDebounce?.cancel();
     super.dispose();
   }
@@ -114,7 +128,7 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
         page: _currentPage,
         pageSize: _pageSize,
         search: _searchText.isEmpty ? null : _searchText,
-        githubProxy: _selectedProxy.isEmpty ? null : _selectedProxy,
+        githubProxy: _effectiveProxy.isEmpty ? null : _effectiveProxy,
       );
       if (!mounted) return;
       setState(() {
@@ -221,107 +235,66 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
 
     return Column(
       children: [
-        // 订阅源选择 + 搜索 + 代理
+        // 订阅源选择 + 代理 + 搜索
         Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<PluginRegistryConfig>(
-                      value: _selectedRegistry,
-                      decoration: const InputDecoration(
-                        labelText: '订阅源',
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                      isExpanded: true,
-                      items: enabledRegistries
-                          .map(
-                            (r) => DropdownMenuItem(
-                              value: r,
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      r.name.isEmpty ? r.url : r.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  if (r.url == _kOfficialRegistryUrl) ...[
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 1,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primaryContainer,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        '官方',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ],
+              DropdownButtonFormField<PluginRegistryConfig>(
+                value: _selectedRegistry,
+                decoration: const InputDecoration(
+                  labelText: '订阅源',
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                isExpanded: true,
+                items: enabledRegistries
+                    .map(
+                      (r) => DropdownMenuItem(
+                        value: r,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                r.name.isEmpty ? r.url : r.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                          )
-                          .toList(),
-                      onChanged: _onRegistryChanged,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.vpn_key_outlined,
-                      color: _selectedProxy.isEmpty
-                          ? null
-                          : Theme.of(context).colorScheme.primary,
-                    ),
-                    tooltip: '选择 GitHub 代理',
-                    onSelected: (v) {
-                      setState(() => _selectedProxy = v);
-                      _refreshPlugins();
-                    },
-                    itemBuilder: (context) => _kGithubProxies
-                        .map(
-                          (p) => PopupMenuItem(
-                            value: p.value,
-                            child: Row(
-                              children: [
-                                if (_selectedProxy == p.value)
-                                  Icon(
-                                    Icons.check,
-                                    size: 18,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  )
-                                else
-                                  const SizedBox(width: 18),
-                                const SizedBox(width: 8),
-                                Text(p.label),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
+                            if (r.url == _kOfficialRegistryUrl) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '官方',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _onRegistryChanged,
               ),
               const SizedBox(height: AppSpacing.sm),
+              _buildProxySelector(theme),
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
@@ -428,7 +401,7 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
             itemBuilder: (context, index) =>
                 _RegistryPluginItem(
                   entry: plugins[index],
-                  githubProxy: _selectedProxy,
+                  githubProxy: _effectiveProxy,
                   onInstalled: () {
                     _refreshPlugins();
                     ref.invalidate(jsPluginsProvider);
@@ -466,6 +439,70 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildProxySelector(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('GitHub 代理', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 8),
+          RadioGroup<int>(
+            groupValue: _selectedProxyIndex,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedProxyIndex = value);
+                _refreshPlugins();
+              }
+            },
+            child: Column(
+              children: [
+                ...List.generate(_kGithubProxies.length, (index) {
+                  final proxy = _kGithubProxies[index];
+                  return RadioListTile<int>(
+                    title: Text(proxy.label, style: theme.textTheme.bodyMedium),
+                    value: index,
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  );
+                }),
+                RadioListTile<int>(
+                  title: Text('自定义代理', style: theme.textTheme.bodyMedium),
+                  value: -1,
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+          ),
+          if (_selectedProxyIndex == -1)
+            Padding(
+              padding: const EdgeInsets.only(left: 16, top: 4),
+              child: TextField(
+                controller: _customProxyController,
+                decoration: const InputDecoration(
+                  hintText: 'https://your-proxy.com/',
+                  helperText: '输入代理地址，如 https://ghproxy.com/',
+                  helperMaxLines: 2,
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                style: theme.textTheme.bodySmall,
+                onSubmitted: (_) => _refreshPlugins(),
+              ),
+            ),
+          const Divider(height: 24),
+        ],
+      ),
     );
   }
 
