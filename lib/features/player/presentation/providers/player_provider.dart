@@ -146,6 +146,8 @@ class PlayerNotifier extends Notifier<PlayerState> {
       }
       // 恢复播放队列
       await _restorePlaybackState(prefs);
+      // 触发歌词 Provider 创建，确保灵动岛能收到歌词更新
+      ref.read(lyricStateProvider);
     } catch (e) {
       debugPrint('[Player] Failed to load preferences: $e');
       await _audioHandler.setVolume(state.volume / 100);
@@ -270,18 +272,6 @@ class PlayerNotifier extends Notifier<PlayerState> {
   /// 初始化 Live Activity 监听
   void _initLiveActivityListeners() {
     final liveActivity = LiveActivityService();
-
-    ref.listen(
-      lyricStateProvider.select((s) => s.currentIndex),
-      (prev, next) {
-        if (prev == next) return;
-        final lyricState = ref.read(lyricStateProvider);
-        liveActivity.updateLyric(
-          lyricState.currentLyricText,
-          lyricState.nextLyricText,
-        );
-      },
-    );
 
     ref.listen(playerStateProvider.select((s) => s.currentSong), (prev, next) {
       if (next == null) {

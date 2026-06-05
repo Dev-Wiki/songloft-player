@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/platform/live_activity_service.dart';
 import '../../../../core/storage/lyric_cache_service.dart';
 import '../../../../core/utils/url_helper.dart';
 import '../../domain/lyric_parser.dart';
@@ -67,30 +66,23 @@ final lyricStateProvider = NotifierProvider<LyricNotifier, LyricState>(
 
 class LyricNotifier extends Notifier<LyricState> {
   String? _lastLoadedUrl;
-  StreamSubscription<dynamic>? _playerSub;
 
   @override
   LyricState build() {
-    ref.listen(playerStateProvider.select((s) => s.currentSong?.lyricUrl), (
-      prev,
-      next,
-    ) {
-      if (prev != next) _loadLyrics(next);
-    });
+    final lyricUrl = ref.watch(
+      playerStateProvider.select((s) => s.currentSong?.lyricUrl),
+    );
 
     ref.listen(playerStateProvider.select((s) => s.currentTime), (prev, next) {
       _updateCurrentLine(next);
     });
 
-    ref.onDispose(() {
-      _playerSub?.cancel();
-    });
-
-    final lyricUrl = ref.read(playerStateProvider).currentSong?.lyricUrl;
     if (lyricUrl != null && lyricUrl.isNotEmpty) {
       Future.microtask(() => _loadLyrics(lyricUrl));
+      return const LyricState(isLoading: true);
     }
 
+    _lastLoadedUrl = null;
     return const LyricState();
   }
 
@@ -99,6 +91,10 @@ class LyricNotifier extends Notifier<LyricState> {
     final newIndex = LyricParser.findCurrentLine(state.lyrics, position);
     if (newIndex != state.currentIndex) {
       state = state.copyWith(currentIndex: newIndex);
+      LiveActivityService().updateLyric(
+        state.currentLyricText,
+        state.nextLyricText,
+      );
     }
   }
 
