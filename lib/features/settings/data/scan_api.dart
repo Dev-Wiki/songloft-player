@@ -115,4 +115,201 @@ class ScanApi {
       throw ApiException.fromDioException(e);
     }
   }
+
+  /// 获取指纹计算状态
+  Future<FingerprintStatus> getFingerprintStatus() async {
+    try {
+      final response = await dio.get(
+        '${AppConfig.apiPrefix}/scan/fingerprints/status',
+      );
+      return FingerprintStatus.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// 触发批量指纹计算
+  Future<void> startFingerprintCompute() async {
+    try {
+      await dio.post('${AppConfig.apiPrefix}/scan/fingerprints');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// 获取指纹计算进度
+  Future<FingerprintProgress> getFingerprintProgress() async {
+    try {
+      final response = await dio.get(
+        '${AppConfig.apiPrefix}/scan/fingerprints/progress',
+      );
+      return FingerprintProgress.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// 获取重复歌曲组
+  Future<DuplicatesResult> getDuplicates() async {
+    try {
+      final response = await dio.get(
+        '${AppConfig.apiPrefix}/songs/duplicates',
+      );
+      return DuplicatesResult.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+}
+
+/// 指纹状态
+class FingerprintStatus {
+  final bool fpcalcAvailable;
+  final int total;
+  final int computed;
+  final int missing;
+
+  FingerprintStatus({
+    required this.fpcalcAvailable,
+    required this.total,
+    required this.computed,
+    required this.missing,
+  });
+
+  factory FingerprintStatus.fromJson(Map<String, dynamic> json) {
+    return FingerprintStatus(
+      fpcalcAvailable: json['fpcalc_available'] as bool? ?? false,
+      total: json['total'] as int? ?? 0,
+      computed: json['computed'] as int? ?? 0,
+      missing: json['missing'] as int? ?? 0,
+    );
+  }
+}
+
+/// 指纹计算进度
+class FingerprintProgress {
+  final String status; // idle, running, done
+  final int computed;
+  final int total;
+  final int failed;
+
+  FingerprintProgress({
+    required this.status,
+    required this.computed,
+    required this.total,
+    required this.failed,
+  });
+
+  factory FingerprintProgress.fromJson(Map<String, dynamic> json) {
+    return FingerprintProgress(
+      status: json['status'] as String? ?? 'idle',
+      computed: json['computed'] as int? ?? 0,
+      total: json['total'] as int? ?? 0,
+      failed: json['failed'] as int? ?? 0,
+    );
+  }
+
+  bool get isRunning => status == 'running';
+  bool get isDone => status == 'done';
+  bool get isIdle => status == 'idle';
+  int get progress => total > 0 ? (computed * 100 ~/ total) : 0;
+}
+
+/// 重复歌曲
+class DuplicateSong {
+  final int id;
+  final String title;
+  final String artist;
+  final String album;
+  final double duration;
+  final String filePath;
+  final String format;
+  final int bitRate;
+  final int fileSize;
+  final String coverUrl;
+  final String addedAt;
+
+  DuplicateSong({
+    required this.id,
+    required this.title,
+    required this.artist,
+    required this.album,
+    required this.duration,
+    required this.filePath,
+    required this.format,
+    required this.bitRate,
+    required this.fileSize,
+    required this.coverUrl,
+    required this.addedAt,
+  });
+
+  factory DuplicateSong.fromJson(Map<String, dynamic> json) {
+    return DuplicateSong(
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? '',
+      artist: json['artist'] as String? ?? '',
+      album: json['album'] as String? ?? '',
+      duration: (json['duration'] as num?)?.toDouble() ?? 0,
+      filePath: json['file_path'] as String? ?? '',
+      format: json['format'] as String? ?? '',
+      bitRate: json['bit_rate'] as int? ?? 0,
+      fileSize: json['file_size'] as int? ?? 0,
+      coverUrl: json['cover_url'] as String? ?? '',
+      addedAt: json['added_at'] as String? ?? '',
+    );
+  }
+
+  String get fileSizeDisplay {
+    if (fileSize < 1024) return '$fileSize B';
+    if (fileSize < 1024 * 1024) return '${(fileSize / 1024).toStringAsFixed(1)} KB';
+    return '${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+}
+
+/// 重复组
+class DuplicateGroup {
+  final String fingerprint;
+  final List<DuplicateSong> songs;
+
+  DuplicateGroup({required this.fingerprint, required this.songs});
+
+  factory DuplicateGroup.fromJson(Map<String, dynamic> json) {
+    return DuplicateGroup(
+      fingerprint: json['fingerprint'] as String? ?? '',
+      songs: (json['songs'] as List<dynamic>?)
+              ?.map((e) => DuplicateSong.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+/// 重复检测结果
+class DuplicatesResult {
+  final List<DuplicateGroup> groups;
+  final int totalGroups;
+  final int totalDuplicates;
+
+  DuplicatesResult({
+    required this.groups,
+    required this.totalGroups,
+    required this.totalDuplicates,
+  });
+
+  factory DuplicatesResult.fromJson(Map<String, dynamic> json) {
+    return DuplicatesResult(
+      groups: (json['groups'] as List<dynamic>?)
+              ?.map((e) => DuplicateGroup.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      totalGroups: json['total_groups'] as int? ?? 0,
+      totalDuplicates: json['total_duplicates'] as int? ?? 0,
+    );
+  }
 }

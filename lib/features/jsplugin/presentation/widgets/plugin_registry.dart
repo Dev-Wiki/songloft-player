@@ -33,23 +33,16 @@ class _ProxyOption {
   const _ProxyOption({required this.label, required this.value});
 }
 
-/// 打开插件商店对话框
-void showPluginRegistryDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => const _PluginRegistryDialog(),
-  );
-}
-
-class _PluginRegistryDialog extends ConsumerStatefulWidget {
-  const _PluginRegistryDialog();
+/// 插件商店页面
+class PluginRegistryPage extends ConsumerStatefulWidget {
+  const PluginRegistryPage({super.key});
 
   @override
-  ConsumerState<_PluginRegistryDialog> createState() =>
-      _PluginRegistryDialogState();
+  ConsumerState<PluginRegistryPage> createState() =>
+      _PluginRegistryPageState();
 }
 
-class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
+class _PluginRegistryPageState extends ConsumerState<PluginRegistryPage> {
   List<PluginRegistryConfig> _registries = [];
   PluginRegistryConfig? _selectedRegistry;
   String _searchText = '';
@@ -173,14 +166,9 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Dialog.fullscreen(
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('插件商店'),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
           actions: [
             PopupMenuButton<int>(
               icon: Icon(
@@ -254,7 +242,6 @@ class _PluginRegistryDialogState extends ConsumerState<_PluginRegistryDialog> {
             : _registries.isEmpty
                 ? _buildEmptyState(theme)
                 : _buildContent(theme),
-      ),
     );
   }
 

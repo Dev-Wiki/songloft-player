@@ -82,17 +82,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             children: [
               const Padding(padding: EdgeInsets.all(16), child: ScanManager()),
               const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.fingerprint),
+                title: const Text('重复歌曲检测'),
+                subtitle: const Text('通过音频指纹识别内容相同的重复文件'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRoutes.duplicateCheck),
+              ),
+              const Divider(height: 1),
               _buildAutoConvertTile(),
             ],
           ),
 
           const SizedBox(height: 16),
 
-          // 分组4: 插件管理
+          // 分组4: 扩展
           _buildSectionCard(
             title: '扩展',
             icon: Icons.extension_outlined,
-            children: [const JSPluginManager()],
+            children: [
+              ListTile(
+                leading: const Icon(Icons.store_outlined),
+                title: const Text('插件商店'),
+                subtitle: const Text('浏览和安装插件'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRoutes.pluginRegistry),
+              ),
+              const Divider(height: 1),
+              const JSPluginManager(),
+            ],
           ),
 
           const SizedBox(height: 16),
@@ -106,16 +124,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
           const SizedBox(height: 16),
 
-          // 分组: 电台 / 流媒体
+          // 分组5: 网络设置
           _buildSectionCard(
-            title: '电台 / 流媒体',
-            icon: Icons.cell_tower_outlined,
-            children: [_buildHlsProxyTile()],
+            title: '网络设置',
+            icon: Icons.language_outlined,
+            children: [
+              _buildHttpProxyTile(),
+              const Divider(height: 1),
+              _buildHlsProxyTile(),
+            ],
           ),
 
           const SizedBox(height: 16),
 
-          // 分组: 数据管理
+          // 分组6: 数据管理
           _buildSectionCard(
             title: '数据管理',
             icon: Icons.backup_outlined,
@@ -140,20 +162,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
           const SizedBox(height: 16),
 
-          // 分组6: 系统
+          // 分组7: 关于与更新
           _buildSectionCard(
-            title: '系统',
-            icon: Icons.settings_outlined,
+            title: '关于与更新',
+            icon: Icons.system_update_outlined,
             children: [
-              _buildHttpProxyTile(),
-              const Divider(height: 1),
-              _buildLogLevelTile(),
-              const Divider(height: 1),
               _buildServerVersionTile(),
               if (!AppConfig.isEmbedded) ...[
                 const Divider(height: 1),
                 _buildFrontendUpdateTile(),
               ],
+              const Divider(height: 1),
+              _buildLogLevelTile(),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.info_outline),

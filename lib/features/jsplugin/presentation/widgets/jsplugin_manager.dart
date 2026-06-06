@@ -12,7 +12,6 @@ import '../../../../core/theme/responsive.dart';
 import '../../../../shared/utils/responsive_snackbar.dart';
 import '../../data/jsplugin_api.dart';
 import '../providers/jsplugin_provider.dart';
-import 'plugin_registry.dart';
 
 /// JS 插件远程更新的预设 GitHub 代理选项
 class _JSProxyOption {
@@ -70,11 +69,6 @@ class _JSPluginManagerState extends ConsumerState<JSPluginManager> {
                         label: const Text('上传插件'),
                       ),
                       OutlinedButton.icon(
-                        onPressed: () => showPluginRegistryDialog(context),
-                        icon: const Icon(Icons.store),
-                        label: const Text('插件商店'),
-                      ),
-                      OutlinedButton.icon(
                         onPressed: _showBatchUpdateDialog,
                         icon: const Icon(Icons.system_update),
                         label: const Text('全部更新'),
@@ -87,12 +81,6 @@ class _JSPluginManagerState extends ConsumerState<JSPluginManager> {
                         onPressed: _showUploadDialog,
                         icon: const Icon(Icons.upload_file),
                         label: const Text('上传插件'),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton.icon(
-                        onPressed: () => showPluginRegistryDialog(context),
-                        icon: const Icon(Icons.store),
-                        label: const Text('插件商店'),
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton.icon(

@@ -14,6 +14,8 @@ import '../../features/playlist/presentation/playlist_detail_page.dart';
 import '../../features/settings/presentation/servers_page.dart';
 import '../../features/settings/presentation/settings_page.dart';
 import '../../features/settings/presentation/tab_config_page.dart';
+import '../../features/jsplugin/presentation/widgets/plugin_registry.dart';
+import '../../features/settings/presentation/duplicate_check_page.dart';
 import '../../shared/layouts/shell_layout.dart';
 
 /// 路由路径常量
@@ -26,6 +28,8 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String servers = '/settings/servers';
   static const String tabConfig = '/settings/tab-config';
+  static const String duplicateCheck = '/settings/duplicate-check';
+  static const String pluginRegistry = '/settings/plugin-registry';
   static const String plugin = '/plugin';
   static const String pluginTab = '/plugin-tab/:entryPath';
 }
@@ -151,6 +155,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.tabConfig,
             builder: (context, state) => const TabConfigPage(),
+          ),
+
+          // 重复歌曲检测
+          GoRoute(
+            path: AppRoutes.duplicateCheck,
+            builder: (context, state) => const DuplicateCheckPage(),
+          ),
+
+          // 插件商店
+          GoRoute(
+            path: AppRoutes.pluginRegistry,
+            builder: (context, state) => const PluginRegistryPage(),
           ),
 
           // 插件 Tab 页面

@@ -92,6 +92,18 @@ final configsProvider = FutureProvider<List<Config>>((ref) async {
   return configApi.getConfigs();
 });
 
+/// 指纹计算状态
+final fingerprintStatusProvider = FutureProvider<FingerprintStatus>((ref) async {
+  final scanApi = ref.watch(scanApiProvider);
+  return scanApi.getFingerprintStatus();
+});
+
+/// 重复歌曲组
+final duplicatesProvider = FutureProvider<DuplicatesResult>((ref) async {
+  final scanApi = ref.watch(scanApiProvider);
+  return scanApi.getDuplicates();
+});
+
 /// 检查服务端更新
 final upgradeCheckProvider = FutureProvider<UpgradeCheck>((ref) async {
   final upgradeApi = ref.watch(upgradeApiProvider);
