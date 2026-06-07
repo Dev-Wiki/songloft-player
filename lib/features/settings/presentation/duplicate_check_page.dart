@@ -145,7 +145,10 @@ class _DuplicateCheckPageState extends ConsumerState<DuplicateCheckPage> {
       final dio = ref.read(dioProvider);
       await dio.post(
         '${AppConfig.apiPrefix}/songs/batch-delete',
-        data: {'ids': toDelete.map((s) => s.id).toList()},
+        data: {
+          'ids': toDelete.map((s) => s.id).toList(),
+          'delete_files': true,
+        },
       );
       if (!mounted) return;
       ResponsiveSnackBar.show(context, message: '已删除 ${toDelete.length} 首重复歌曲');
@@ -176,7 +179,10 @@ class _DuplicateCheckPageState extends ConsumerState<DuplicateCheckPage> {
       final dio = ref.read(dioProvider);
       await dio.post(
         '${AppConfig.apiPrefix}/songs/batch-delete',
-        data: {'ids': allToDelete},
+        data: {
+          'ids': allToDelete,
+          'delete_files': true,
+        },
       );
       if (!mounted) return;
       ResponsiveSnackBar.show(context, message: '已删除 ${allToDelete.length} 首重复歌曲');
@@ -192,7 +198,7 @@ class _DuplicateCheckPageState extends ConsumerState<DuplicateCheckPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('确认删除'),
-        content: Text('将删除 $count 首重复歌曲，保留每组中选中的版本。此操作不可撤销。'),
+        content: Text('将删除 $count 首重复歌曲及其对应的音频文件，保留每组中选中的版本。此操作不可撤销。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
