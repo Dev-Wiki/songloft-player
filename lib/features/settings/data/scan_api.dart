@@ -131,9 +131,12 @@ class ScanApi {
   }
 
   /// 触发批量指纹计算
-  Future<void> startFingerprintCompute() async {
+  Future<void> startFingerprintCompute({bool recomputeAll = false}) async {
     try {
-      await dio.post('${AppConfig.apiPrefix}/scan/fingerprints');
+      await dio.post(
+        '${AppConfig.apiPrefix}/scan/fingerprints',
+        data: recomputeAll ? {'recompute_all': true} : null,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

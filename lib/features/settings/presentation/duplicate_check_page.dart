@@ -65,13 +65,13 @@ class _DuplicateCheckPageState extends ConsumerState<DuplicateCheckPage> {
     }
   }
 
-  Future<void> _startCompute() async {
+  Future<void> _startCompute({bool recomputeAll = false}) async {
     setState(() {
       _error = null;
     });
     try {
       final api = ref.read(scanApiProvider);
-      await api.startFingerprintCompute();
+      await api.startFingerprintCompute(recomputeAll: recomputeAll);
       if (!mounted) return;
       setState(() => _phase = _PagePhase.computing);
       _startPolling();
@@ -337,6 +337,17 @@ class _DuplicateCheckPageState extends ConsumerState<DuplicateCheckPage> {
               label: Text(status.missing > 0 ? '开始计算并检测' : '检测重复'),
             ),
           ),
+          if (status.chromaprintAvailable && status.computed > 0) ...[
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: () => _startCompute(recomputeAll: true),
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('重新计算全部指纹'),
+              ),
+            ),
+          ],
         ],
       ],
     );
