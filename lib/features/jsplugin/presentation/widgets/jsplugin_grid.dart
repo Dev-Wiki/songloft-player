@@ -10,6 +10,7 @@ import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/responsive.dart';
 import '../../data/jsplugin_api.dart';
 import '../providers/jsplugin_provider.dart';
+import '../../../home/presentation/plugin_theme_utils.dart';
 
 /// JS 插件入口网格组件
 class JSPluginGrid extends ConsumerWidget {
@@ -177,18 +178,17 @@ class _JSPluginCard extends StatelessWidget {
     }
 
     final url = '${AppConfig.baseUrl}${AppConfig.basePath}/api/v1/jsplugin/${plugin.entryPath}';
+    final theme = Theme.of(context).brightness == Brightness.dark ? 'dark' : 'light';
 
     if (kIsWeb) {
       // Web 平台：使用 launchUrl 在新标签页打开
       final token = SecureStorageService.cachedAccessToken ?? '';
-      final separator = url.contains('?') ? '&' : '?';
-      final webUrl =
-          token.isNotEmpty
-              ? Uri.parse('$url${separator}access_token=$token')
-              : Uri.parse(url);
+      final params = <String>['theme=$theme'];
+      if (token.isNotEmpty) params.add('access_token=$token');
+      final webUrl = Uri.parse('$url?${params.join('&')}');
       launchUrl(webUrl, mode: LaunchMode.externalApplication);
     } else {
-      // 原生平台：应用内 WebView
+      // 原生平台：应用内 WebView（主题由 WebView 页面自行处理）
       context.push(
         Uri(
           path: AppRoutes.plugin,

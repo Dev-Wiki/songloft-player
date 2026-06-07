@@ -2,13 +2,16 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/storage/secure_storage.dart';
+import '../../settings/presentation/providers/settings_provider.dart';
+import 'plugin_theme_utils.dart';
 
 /// 插件 WebView 页面（原生平台实现）
 /// 在应用内加载插件 HTML 页面，通过 JS 注入传递 JWT token
-class PluginWebViewPage extends StatefulWidget {
+class PluginWebViewPage extends ConsumerStatefulWidget {
   final String pluginUrl;
   final String pluginName;
 
@@ -19,21 +22,24 @@ class PluginWebViewPage extends StatefulWidget {
   });
 
   @override
-  State<PluginWebViewPage> createState() => _PluginWebViewPageState();
+  ConsumerState<PluginWebViewPage> createState() => _PluginWebViewPageState();
 }
 
-class _PluginWebViewPageState extends State<PluginWebViewPage> {
+class _PluginWebViewPageState extends ConsumerState<PluginWebViewPage> {
   InAppWebViewController? _webViewController;
   bool _isLoading = true;
+  bool _pageReady = false;
   String? _errorMessage;
+  String? _lastTheme;
 
-  /// 构建 token 注入脚本
-  /// 将 access token 写入 localStorage['songloft-auth']，
-  /// 格式与旧 Vue 前端一致，插件 JS 的 getAuthToken() 可直接读取
+  String _buildPluginUrl(String theme) {
+    final separator = widget.pluginUrl.contains('?') ? '&' : '?';
+    return '${widget.pluginUrl}${separator}theme=$theme';
+  }
+
   String _buildTokenInjectionScript() {
     final token = SecureStorageService.cachedAccessToken ?? '';
     if (token.isEmpty) return '';
-    // 转义 token 中可能的特殊字符
     final escapedToken = token
         .replaceAll('\\', '\\\\')
         .replaceAll("'", "\\'")
@@ -41,9 +47,26 @@ class _PluginWebViewPageState extends State<PluginWebViewPage> {
     return "localStorage.setItem('songloft-auth', JSON.stringify({accessToken: '$escapedToken'}));";
   }
 
+  void _sendThemeToPlugin(String theme) {
+    _webViewController?.evaluateJavascript(
+      source:
+          "window.postMessage({type:'songloft-theme',theme:'$theme'},'*')",
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final themeMode = ref.watch(themeModeProvider);
+    final brightness = MediaQuery.of(context).platformBrightness;
+    final theme = resolveEffectiveTheme(themeMode, brightness);
+
+    if (_lastTheme == null) {
+      _lastTheme = theme;
+    } else if (_lastTheme != theme) {
+      _lastTheme = theme;
+      if (_pageReady) _sendThemeToPlugin(theme);
+    }
 
     return PopScope(
       canPop: false,
@@ -71,25 +94,26 @@ class _PluginWebViewPageState extends State<PluginWebViewPage> {
             },
           ),
           actions: [
-            // 关闭 WebView 页面
             IconButton(
               icon: const Icon(Icons.close),
               tooltip: '关闭',
               onPressed: () => Navigator.of(context).pop(),
             ),
-            // 在外部浏览器中打开
             IconButton(
               icon: const Icon(Icons.open_in_browser),
               tooltip: '在浏览器中打开',
               onPressed: () {
-                // 附加 token 到 URL，auth-bridge 脚本会从 query parameter 读取
                 final token = SecureStorageService.cachedAccessToken ?? '';
-                final separator = widget.pluginUrl.contains('?') ? '&' : '?';
-                final url =
-                    token.isNotEmpty
-                        ? '${widget.pluginUrl}${separator}access_token=$token'
-                        : widget.pluginUrl;
-                launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                final separator =
+                    widget.pluginUrl.contains('?') ? '&' : '?';
+                var url = widget.pluginUrl;
+                final params = <String>['theme=$theme'];
+                if (token.isNotEmpty) params.add('access_token=$token');
+                url = '$url$separator${params.join('&')}';
+                launchUrl(
+                  Uri.parse(url),
+                  mode: LaunchMode.externalApplication,
+                );
               },
             ),
           ],
@@ -99,7 +123,7 @@ class _PluginWebViewPageState extends State<PluginWebViewPage> {
             if (_errorMessage != null)
               _buildErrorView(colorScheme)
             else
-              _buildWebView(),
+              _buildWebView(theme),
             if (_isLoading) const Center(child: CircularProgressIndicator()),
           ],
         ),
@@ -107,12 +131,11 @@ class _PluginWebViewPageState extends State<PluginWebViewPage> {
     );
   }
 
-  Widget _buildWebView() {
-    // 原生平台通过 initialUserScripts 在 document_start 阶段注入 token
+  Widget _buildWebView(String theme) {
     final tokenScript = _buildTokenInjectionScript();
 
     return InAppWebView(
-      initialUrlRequest: URLRequest(url: WebUri(widget.pluginUrl)),
+      initialUrlRequest: URLRequest(url: WebUri(_buildPluginUrl(theme))),
       initialUserScripts:
           tokenScript.isNotEmpty
               ? UnmodifiableListView([
@@ -141,11 +164,13 @@ class _PluginWebViewPageState extends State<PluginWebViewPage> {
       },
       onLoadStop: (controller, url) {
         if (mounted) {
-          setState(() => _isLoading = false);
+          setState(() {
+            _isLoading = false;
+            _pageReady = true;
+          });
         }
       },
       onReceivedError: (controller, request, error) {
-        // 仅处理主页面加载错误，忽略子资源错误
         if (request.isForMainFrame ?? false) {
           if (mounted) {
             setState(() {

@@ -2,27 +2,33 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../config/app_config.dart';
 import '../../../core/storage/secure_storage.dart';
+import '../../settings/presentation/providers/settings_provider.dart';
+import 'plugin_theme_utils.dart';
 
 /// 插件 Tab 页面（原生平台实现）
 /// 在 Shell 内嵌入 WebView 展示插件页面，底部导航栏保持可见
-class PluginTabPage extends StatefulWidget {
+class PluginTabPage extends ConsumerStatefulWidget {
   final String entryPath;
 
   const PluginTabPage({super.key, required this.entryPath});
 
   @override
-  State<PluginTabPage> createState() => _PluginTabPageState();
+  ConsumerState<PluginTabPage> createState() => _PluginTabPageState();
 }
 
-class _PluginTabPageState extends State<PluginTabPage> {
+class _PluginTabPageState extends ConsumerState<PluginTabPage> {
+  InAppWebViewController? _webViewController;
   bool _isLoading = true;
+  bool _pageReady = false;
   String? _errorMessage;
+  String? _lastTheme;
 
-  String get _pluginUrl =>
-      '${AppConfig.baseUrl}${AppConfig.basePath}/api/v1/jsplugin/${widget.entryPath}?embed';
+  String _buildPluginUrl(String theme) =>
+      '${AppConfig.baseUrl}${AppConfig.basePath}/api/v1/jsplugin/${widget.entryPath}?embed&theme=$theme';
 
   String _buildTokenInjectionScript() {
     final token = SecureStorageService.cachedAccessToken ?? '';
@@ -34,9 +40,26 @@ class _PluginTabPageState extends State<PluginTabPage> {
     return "localStorage.setItem('songloft-auth', JSON.stringify({accessToken: '$escapedToken'}));";
   }
 
+  void _sendThemeToPlugin(String theme) {
+    _webViewController?.evaluateJavascript(
+      source:
+          "window.postMessage({type:'songloft-theme',theme:'$theme'},'*')",
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final themeMode = ref.watch(themeModeProvider);
+    final brightness = MediaQuery.of(context).platformBrightness;
+    final theme = resolveEffectiveTheme(themeMode, brightness);
+
+    if (_lastTheme == null) {
+      _lastTheme = theme;
+    } else if (_lastTheme != theme) {
+      _lastTheme = theme;
+      if (_pageReady) _sendThemeToPlugin(theme);
+    }
 
     return SafeArea(
       bottom: false,
@@ -45,18 +68,18 @@ class _PluginTabPageState extends State<PluginTabPage> {
           if (_errorMessage != null)
             _buildErrorView(colorScheme)
           else
-            _buildWebView(),
+            _buildWebView(theme),
           if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );
   }
 
-  Widget _buildWebView() {
+  Widget _buildWebView(String theme) {
     final tokenScript = _buildTokenInjectionScript();
 
     return InAppWebView(
-      initialUrlRequest: URLRequest(url: WebUri(_pluginUrl)),
+      initialUrlRequest: URLRequest(url: WebUri(_buildPluginUrl(theme))),
       initialUserScripts: tokenScript.isNotEmpty
           ? UnmodifiableListView([
               UserScript(
@@ -71,6 +94,9 @@ class _PluginTabPageState extends State<PluginTabPage> {
         allowUniversalAccessFromFileURLs: true,
         supportZoom: false,
       ),
+      onWebViewCreated: (controller) {
+        _webViewController = controller;
+      },
       onLoadStart: (controller, url) {
         if (mounted) {
           setState(() {
@@ -81,7 +107,10 @@ class _PluginTabPageState extends State<PluginTabPage> {
       },
       onLoadStop: (controller, url) {
         if (mounted) {
-          setState(() => _isLoading = false);
+          setState(() {
+            _isLoading = false;
+            _pageReady = true;
+          });
         }
       },
       onReceivedError: (controller, request, error) {
