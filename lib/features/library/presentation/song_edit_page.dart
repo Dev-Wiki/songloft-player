@@ -26,6 +26,7 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
   late final TextEditingController _urlController;
   late final TextEditingController _coverUrlController;
   late final TextEditingController _durationController;
+  late final TextEditingController _lyricUrlController;
   bool _isSubmitting = false;
 
   bool get isEditMode => widget.song != null;
@@ -46,6 +47,9 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
     _durationController = TextEditingController(
       text: widget.song?.duration.toStringAsFixed(0) ?? '',
     );
+    _lyricUrlController = TextEditingController(
+      text: widget.song?.lyricRemoteUrl ?? '',
+    );
   }
 
   @override
@@ -56,6 +60,7 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
     _urlController.dispose();
     _coverUrlController.dispose();
     _durationController.dispose();
+    _lyricUrlController.dispose();
     super.dispose();
   }
 
@@ -179,6 +184,21 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // 歌词 URL（仅网络歌曲）
+              if (!isRadio) ...[
+                TextFormField(
+                  controller: _lyricUrlController,
+                  decoration: const InputDecoration(
+                    labelText: '歌词 URL',
+                    hintText: '请输入歌词接口链接',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.url,
                   textInputAction: TextInputAction.done,
                 ),
                 const SizedBox(height: 16),
@@ -248,6 +268,27 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
               isRadio ? null : (double.tryParse(_durationController.text)),
           isLive: null,
         );
+
+        // 歌词 URL 变化时单独更新
+        if (!isRadio) {
+          final newLyricUrl = _lyricUrlController.text.trim();
+          final oldLyricUrl = widget.song?.lyricRemoteUrl ?? '';
+          if (newLyricUrl != oldLyricUrl) {
+            if (newLyricUrl.isEmpty) {
+              await repository.updateSongLyrics(
+                widget.song!.id,
+                lyricSource: '',
+                lyric: '',
+              );
+            } else {
+              await repository.updateSongLyrics(
+                widget.song!.id,
+                lyricSource: 'url',
+                lyricRemoteUrl: newLyricUrl,
+              );
+            }
+          }
+        }
       } else if (isRadio) {
         // 创建电台
         await repository.createRadioSong(
@@ -280,6 +321,10 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
                   ? null
                   : _coverUrlController.text.trim(),
           duration: double.tryParse(_durationController.text),
+          lyricRemoteUrl:
+              _lyricUrlController.text.trim().isEmpty
+                  ? null
+                  : _lyricUrlController.text.trim(),
         );
       }
 

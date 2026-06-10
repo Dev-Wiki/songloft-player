@@ -64,6 +64,7 @@ class SongsRepository {
     required String url,
     String? coverUrl,
     double? duration,
+    String? lyricRemoteUrl,
   }) async {
     try {
       return await songsApi.createRemoteSong(
@@ -73,6 +74,7 @@ class SongsRepository {
         url: url,
         coverUrl: coverUrl,
         duration: duration,
+        lyricRemoteUrl: lyricRemoteUrl,
       );
     } on DioException catch (e) {
       throw _handleError(e);

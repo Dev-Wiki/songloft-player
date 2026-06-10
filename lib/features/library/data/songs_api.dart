@@ -94,6 +94,7 @@ class SongsApi {
     required String url,
     String? coverUrl,
     double? duration,
+    String? lyricRemoteUrl,
   }) async {
     final songs = await createRemoteSongs([
       {
@@ -103,6 +104,10 @@ class SongsApi {
         'url': url,
         'cover_url': coverUrl,
         'duration': duration,
+        if (lyricRemoteUrl != null && lyricRemoteUrl.isNotEmpty) ...{
+          'lyric': lyricRemoteUrl,
+          'lyric_source': 'url',
+        },
       },
     ]);
     return songs.first;

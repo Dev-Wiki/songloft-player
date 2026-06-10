@@ -10,6 +10,7 @@ class Song {
   final String? url;
   final String? coverUrl; // 封面URL（后端统一处理）
   final String? lyricUrl; // 歌词URL（后端统一处理，有歌词时为 /api/v1/songs/{id}/lyric，无歌词时为空）
+  final String? lyricRemoteUrl; // 歌词原始 URL（lyric_source=url 时的原始 URL）
   final int fileSize;
   final String? format;
   final int bitRate;
@@ -30,6 +31,7 @@ class Song {
     this.url,
     this.coverUrl,
     this.lyricUrl,
+    this.lyricRemoteUrl,
     this.fileSize = 0,
     this.format,
     this.bitRate = 0,
@@ -52,6 +54,7 @@ class Song {
       url: json['url'] as String?,
       coverUrl: json['cover_url'] as String?,
       lyricUrl: json['lyric_url'] as String?,
+      lyricRemoteUrl: json['lyric_remote_url'] as String?,
       fileSize: json['file_size'] as int? ?? 0,
       format: json['format'] as String?,
       bitRate: json['bit_rate'] as int? ?? 0,
@@ -81,6 +84,7 @@ class Song {
       'url': url,
       'cover_url': coverUrl,
       'lyric_url': lyricUrl,
+      'lyric_remote_url': lyricRemoteUrl,
       'file_size': fileSize,
       'format': format,
       'bit_rate': bitRate,
@@ -103,6 +107,7 @@ class Song {
     String? url,
     String? coverUrl,
     String? lyricUrl,
+    String? lyricRemoteUrl,
     int? fileSize,
     String? format,
     int? bitRate,
@@ -123,6 +128,7 @@ class Song {
       url: url ?? this.url,
       coverUrl: coverUrl ?? this.coverUrl,
       lyricUrl: lyricUrl ?? this.lyricUrl,
+      lyricRemoteUrl: lyricRemoteUrl ?? this.lyricRemoteUrl,
       fileSize: fileSize ?? this.fileSize,
       format: format ?? this.format,
       bitRate: bitRate ?? this.bitRate,
