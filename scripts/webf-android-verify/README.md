@@ -58,6 +58,7 @@ Outputs are written to `scripts/webf-android-verify/out/miot-test/`:
 | B | 定时页「歌单」下拉 | 面板首个选项的 `top` 必须 **大于** 触发器 `bottom`（面板在下方），且面板不越出视口 |
 | C | 设备页登录二维码 | `ImageView 登录二维码` 应为 **550×550** 设备 px（= 200×200 逻辑 px）；只有几 px 就是塌了 |
 | D | toast | 点「自动填充」后 toast 节点宽度应非 0 |
+| E | 面板内滚动 | `22-playlist-panel-OPEN` 与 `25-panel-after-inner-scroll` 两份 dump 里，**面板盒子的位置必须一致**（内容滚了、盒子没动）。盒子跟着滚动往下跑 = fixed 元素自己当了滚动容器，见下 |
 
 脚本会预置 12 个歌单（下拉要 ≥8 项才顶到 320px 上限、才走得到翻转/让位分支），
 并把插件 `server_host` 设成宿主的非回环 IP —— 插件的 `/playlists` 在 `server_host`
@@ -67,6 +68,11 @@ Outputs are written to `scripts/webf-android-verify/out/miot-test/`:
 > 落在折叠线上的按钮在 dump 里是个高度十几 px 的薄片，**点它不触发任何事件**，
 > 而 dump 里明明有那段文字，极易误判成「点了没反应」。`runner-miot/tapnode.py`
 > 因此要求节点整体落在 `[180,1600]` 内才肯点，不满足就先滚动。
+>
+> 另一个 WebF 坑（E 段就是为它加的）：`position: fixed` 的元素**不能自己是滚动容器**。
+> `getFixedScrollCompensation()` 走 `getTotalScrollOffset()`，而后者从 `this.scrollTop`
+> 起算（`rendering/box_model.dart:1807`），所以在这个元素内部滚 N px，它整体就被往下
+> 画 N px。滚动必须放到内层子元素上。参考 songloft-org/songloft#397。
 >
 > 调试布局时可往插件前端塞临时 `console.log` 探针：页面 console 会以
 > `flutter : [plugin][console] ...` 进 logcat，runner 已抽到 `out/ui-issues/page-console.txt`。

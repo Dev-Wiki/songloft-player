@@ -144,7 +144,11 @@ if tap_node '^定时$' 40 3; then
     if tap_node '^选择歌单$' 40 12; then
       sleep 3
       shot 22-playlist-panel-OPEN
-      # 再 dump 一次拿面板里选项的坐标（用于判断面板落在触发器上方还是下方）
+      # E) 在面板内部滚动：面板本体若自己是滚动容器，WebF 会把它的 scrollTop 计入
+      #    fixed 的绘制补偿，面板会整体往下跑（songloft-org/songloft#397）。
+      #    判定 = 22 与 25 两份 dump 里，面板选项的 top 应保持一致（内容滚了、盒子没动）。
+      adb -s "$SERIAL" shell input swipe 540 1300 540 1100 400; sleep 3
+      shot 25-panel-after-inner-scroll
       adb -s "$SERIAL" shell input keyevent 4; sleep 2
       shot 23-panel-closed
     else
