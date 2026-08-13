@@ -321,15 +321,17 @@ class _SongloftSliderState extends WebFWidgetElementState {
 
   /// 派发 DOM 事件给页面 JS。
   ///
-  /// `input` 用 `dom.InputEvent(inputType: '', data: <新值>)` 而**不是**裸
-  /// `dom.Event('input')`：WebF 自己的 `<input>` 就是这么派发的
-  /// （`html/form/base_input.dart:560-562`），`input` 这个类型对应的 raw struct
-  /// 比基类多两个字段（`event.dart:589-599` 的 `toRaw`），裸 `Event('input')`
-  /// 长度不够、C++ 侧行为未经证实。`change` 则用裸 `dom.Event('change')`
-  /// ——WebF 自己也这样（`base_input.dart:503`）。
+  /// `input` 用 `dom.InputEvent(inputType: '', data: <新值>)`：WebF 自己的
+  /// `<input>` 就是这么派发的（`html/form/base_input.dart:560-562`）。页面侧
+  /// 通过 `(event as InputEvent).data` 读取新值。
   ///
-  /// 新值同时塞进 `event.data`，页面侧读 `e.data` 即可拿到；**刻意不回写自己的
-  /// `value` 属性**（见 [_localValue]）。
+  /// `change` 用 `dom.CustomEvent('change', detail: <新值>)`：页面侧通过
+  /// `(event as CustomEvent).detail` 读取。不能用裸 `dom.Event('change')`
+  /// ——那样 JS 只能从 `event.target.value`（即 `value` 属性）读值，而交互期
+  /// 本元素**刻意不回写 `value` 属性**（见 [_localValue]），加上 `dispatchEvent`
+  /// 是异步的，属性写入与 `change` 派发之间存在竞态，JS 拿到的会是旧值。
+  ///
+  /// **刻意不回写自己的 `value` 属性**（见 [_localValue]）。
   ///
   /// `dispatchEvent` 返回 `Future<void>`、是**异步**的：JS 回调不在同一微任务内
   /// 跑完。这里刻意不 await —— 手势回调不该被页面 JS 的执行时长拖住。
@@ -340,10 +342,10 @@ class _SongloftSliderState extends WebFWidgetElementState {
         widgetElement.dispatchEvent(dom.InputEvent(inputType: '', data: data));
       }
       if (change) {
-        widgetElement.dispatchEvent(dom.Event('change'));
+        widgetElement
+            .dispatchEvent(dom.CustomEvent('change', detail: data));
       }
     } catch (e) {
-      // 事件构造/派发失败只该让「页面收不到这一次通知」，不该打断手势。
       debugPrint('[plugin][$kSongloftSliderTag] dispatchEvent 失败: $e');
     }
   }
