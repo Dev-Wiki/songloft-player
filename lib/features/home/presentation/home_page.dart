@@ -264,7 +264,7 @@ class _GreetingAppBar extends StatelessWidget {
         mobile: 90,
         tablet: 100,
         desktop: 110,
-        auto_: 70,
+        widescreen: 70,
       ),
       floating: false,
       pinned: true,

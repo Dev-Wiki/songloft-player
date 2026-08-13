@@ -49,8 +49,9 @@ https://github.com/songloft-org/songloft/issues/6
 ## 功能特性
 
 - **跨平台支持**: iOS、Android（手机/平板）、macOS、Windows、Linux、Web
+- **车机版本**: 车载信息娱乐系统请使用 [songloft-tv](https://github.com/boluofan/songloft-tv)
 - **Bundle 本地模式**: 内嵌 Go 后端，无需服务器，支持本地/远程双模式切换
-- **响应式布局**: 3 级断点自适应（Mobile < 600px, Tablet 600-900px, Desktop 900px+）
+- **响应式布局**: 3 级断点自适应（Mobile < 600px, Tablet 600-900px, Desktop 900px+），超宽屏（宽高比 > 2.2:1）自动切换 Dock 导航
 - **自适应导航**: 手机底栏、平板侧栏、桌面侧边菜单
 - **音乐播放**: 基于 just_audio，支持本地和网络歌曲，后台播放
 - **歌单管理**: 创建、编辑、删除歌单，添加/移除歌曲

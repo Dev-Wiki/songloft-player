@@ -259,10 +259,10 @@ class _DesktopFullPlayerState extends ConsumerState<DesktopFullPlayer>
                           flex: 4,
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              // 超宽屏又矮时（车机模式）纵向空间不足，按左栏实际可用
-                              // 高度动态收缩封面：为标题+艺术家+间距预留 ~100px、
-                              // 唱片环上下各 8px 预留 16px，其余留给封面，避免
-                              // 固定 coverSize 撑破 Column 造成底部溢出。
+                              // 超宽屏又矮时纵向空间不足，按左栏实际可用高度动态
+                              // 收缩封面：为标题+艺术家+间距预留 ~100px、唱片环
+                              // 上下各 8px 预留 16px，其余留给封面，避免固定
+                              // coverSize 撑破 Column 造成底部溢出。
                               final budget = constraints.maxHeight - 100 - 16;
                               final maxCover = budget < 140.0 ? 140.0 : budget;
                               final effectiveCover =

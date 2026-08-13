@@ -49,8 +49,9 @@ Download the latest version from [GitHub Releases](https://github.com/songloft-o
 ## Features
 
 - **Cross-platform**: iOS, Android (phone/tablet), macOS, Windows, Linux, Web
+- **Car/IVI version**: For in-vehicle infotainment systems, use [songloft-tv](https://github.com/boluofan/songloft-tv)
 - **Bundle local mode**: Embedded Go backend, no server needed, supports local/remote mode switching
-- **Responsive layout**: 3-level breakpoints (Mobile < 600px, Tablet 600-900px, Desktop 900px+)
+- **Responsive layout**: 3-level breakpoints (Mobile < 600px, Tablet 600-900px, Desktop 900px+), ultra-wide screens (aspect ratio > 2.2:1) auto-switch to Dock navigation
 - **Adaptive navigation**: Bottom bar on mobile, sidebar on tablet, side menu on desktop
 - **Music playback**: Powered by just_audio, supports local and network songs, background playback
 - **Playlist management**: Create, edit, delete playlists, add/remove songs

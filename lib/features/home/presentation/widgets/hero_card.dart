@@ -42,7 +42,7 @@ class HeroCard extends StatelessWidget {
       mobile: 180,
       tablet: 240,
       desktop: 280,
-      auto_: 150,
+      widescreen: 150,
     );
 
     final borderRadius = context.responsive<double>(

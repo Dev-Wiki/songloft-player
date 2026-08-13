@@ -46,8 +46,8 @@ class AdaptiveScaffold extends StatelessWidget {
         return _buildTabletLayout(context);
       case ScreenType.desktop:
         return _buildDesktopLayout(context);
-      case ScreenType.auto_:
-        return _buildAutoLayout(context);
+      case ScreenType.widescreen:
+        return _buildWidescreenLayout(context);
     }
   }
 
@@ -338,14 +338,14 @@ class AdaptiveScaffold extends StatelessWidget {
     );
   }
 
-  /// Auto/Car: 左侧 Dock 导航布局（宽高比 > 2.2 的超宽屏幕）
-  Widget _buildAutoLayout(BuildContext context) {
-    // 超宽屏纵向空间稀缺：播放器改走右侧竖排常驻面板（bottomPlayer 在 auto 模式下
-    // 由 ShellLayout 传入 AutoSidePlayer），而非底部横条，避免吃掉宝贵的高度。
+  /// 超宽屏：左侧 Dock 导航布局（宽高比 > 2.2）
+  Widget _buildWidescreenLayout(BuildContext context) {
+    // 超宽屏纵向空间稀缺：播放器改走右侧竖排常驻面板（bottomPlayer 在 widescreen
+    // 模式下由 ShellLayout 传入 WidescreenSidePlayer），而非底部横条。
     return Scaffold(
       body: Row(
         children: [
-          _AutoDock(
+          _WidescreenDock(
             destinations: destinations,
             currentIndex: currentIndex,
             onDestinationSelected: onDestinationSelected,
@@ -360,11 +360,11 @@ class AdaptiveScaffold extends StatelessWidget {
   }
 }
 
-/// Auto/Car 模式左侧 Dock 导航组件
+/// 超宽屏模式左侧 Dock 导航组件
 ///
 /// 140px 宽的垂直导航栏，顶部 Logo，下方导航项（图标+标签），
-/// 适配车机超宽屏幕，大触控目标（最小 56dp 高度）。
-class _AutoDock extends StatelessWidget {
+/// 适配超宽屏幕，大触控目标（最小 56dp 高度）。
+class _WidescreenDock extends StatelessWidget {
   final List<NavDestination> destinations;
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -372,7 +372,7 @@ class _AutoDock extends StatelessWidget {
   static const double _dockWidth = 140;
   static const double _itemHeight = 60;
 
-  const _AutoDock({
+  const _WidescreenDock({
     required this.destinations,
     required this.currentIndex,
     required this.onDestinationSelected,

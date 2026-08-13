@@ -21,7 +21,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final categories = buildSettingsCategories(l10n);
-    // 与 SettingsMasterDetail 共用同一布局判断，避免漂移导致车机超宽比下渲染
+    // 与 SettingsMasterDetail 共用同一布局判断，避免漂移导致超宽比下渲染
     // 移动端列表却不响应点击的「按钮失效」(songloft-org/songloft#268)。
     final isMobile = !context.useWideLayout;
 

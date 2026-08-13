@@ -374,7 +374,7 @@ class _ShellLayoutState extends ConsumerState<ShellLayout> {
           context.go(activeDest.indexToRoute[index]);
         }
       },
-      // 插件/设置页隐藏播放器以让出空间（含超宽屏 auto 模式）
+      // 插件/设置页隐藏播放器以让出空间（含超宽屏模式）
       bottomPlayer:
           (isPluginTab || isSettings) ? null : _buildBottomPlayer(context),
       playlistDrawer: showPlaylistDrawer ? const PlaylistDrawer() : null,
@@ -392,10 +392,9 @@ class _ShellLayoutState extends ConsumerState<ShellLayout> {
       case ScreenType.tablet:
       case ScreenType.desktop:
         return const DesktopPlayer();
-      case ScreenType.auto_:
-        // 车机/超宽屏纵向空间稀缺：改用右侧竖排常驻播放面板，AdaptiveScaffold 的
-        // _buildAutoLayout 会把它摆到最右侧，而非底部横条
-        return const AutoSidePlayer();
+      case ScreenType.widescreen:
+        // 超宽屏纵向空间稀缺：改用右侧竖排常驻播放面板
+        return const WidescreenSidePlayer();
     }
   }
 }

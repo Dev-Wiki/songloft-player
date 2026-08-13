@@ -3,7 +3,6 @@
     <uses-sdk tools:overrideLibrary="io.flutter.plugins.flutter_plugin_android_lifecycle, io.flutter.plugins.urllauncher, io.flutter.plugins.sharedpreferences" />
 
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-    <uses-feature android:name="android.hardware.type.automotive" android:required="false" />
     
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- 本地模式：读取设备音频文件 -->
@@ -54,12 +53,6 @@
             android:name="com.ryanheise.audioservice.AudioService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-            <meta-data
-                android:name="com.google.android.gms.car.application"
-                android:resource="@xml/automotive_app_desc" />
         </service>
         <receiver
             android:name="com.ryanheise.audioservice.MediaButtonReceiver"

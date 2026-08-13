@@ -57,7 +57,6 @@ android {
         applicationId = "com.songloft.songloft_flutter"
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // audio_session 依赖要求 API 24+，与 Flutter 默认值保持一致。
-        // Android Automotive 建议 API 28+，但非强制
         @Suppress("PropertyName")
         val SONGLOFT_MIN_SDK = 24
         minSdk = SONGLOFT_MIN_SDK

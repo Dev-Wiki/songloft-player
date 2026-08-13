@@ -14,14 +14,14 @@ import 'video_stage.dart';
 import 'video_subtitle_overlay.dart';
 import 'volume_control.dart';
 
-/// 超宽屏（车机模式，isAuto）右侧常驻「正在播放」面板。
+/// 超宽屏（isWidescreen）右侧常驻「正在播放」面板。
 ///
 /// 超宽屏纵向空间稀缺、横向富余，底部播放器条会吃掉宝贵的高度，因此这里改用
 /// 右侧竖排面板：封面 + 标题/艺术家 + 进度 + 控制 + 音量。内容用
-/// SingleChildScrollView 包裹，保证在极扁的车机屏上也不会溢出
+/// SingleChildScrollView 包裹，保证在极扁的超宽屏上也不会溢出
 /// (songloft-org/songloft-player 超宽屏播放器缺失修复)。
-class AutoSidePlayer extends ConsumerWidget {
-  const AutoSidePlayer({super.key});
+class WidescreenSidePlayer extends ConsumerWidget {
+  const WidescreenSidePlayer({super.key});
 
   /// 面板宽度：超宽屏横向富余，320 既容得下控件也不喧宾夺主
   static const double panelWidth = 320;
