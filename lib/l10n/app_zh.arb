@@ -1275,7 +1275,7 @@
   "playlistSongDeleted": "歌曲已删除",
   "playlistDeleteFailed": "删除失败",
   "playlistBatchDelete": "批量删除",
-  "playlistBatchDeleteSongsConfirm": "确定要从曲库中删除选中的 {count} 首歌��吗？",
+  "playlistBatchDeleteSongsConfirm": "确定要从曲库中删除选中的 {count} 首歌曲吗？",
   "@playlistBatchDeleteSongsConfirm": {
     "placeholders": {
       "count": {
@@ -2352,7 +2352,7 @@
   "settingsProxyAllowlistHelper": "每行填一个单 IP（如 192.168.1.100）或 CIDR 网段（如 192.168.1.0/24）。仅影响通用资源代理，不影响其他功能。",
   "settingsProxyAllowlistSaved": "已保存私网代理白名单",
   "settingsInsecureTlsTitle": "忽略 SSL 证书校验",
-  "settingsInsecureTlsSubtitle": "���接使用自签或无效 HTTPS 证书的服务器时开启。同时对接口请求和音频播放生效",
+  "settingsInsecureTlsSubtitle": "连接使用自签或无效 HTTPS 证书的服务器时开启。同时对接口请求和音频播放生效",
   "settingsInsecureTlsEnabled": "已开启忽略证书校验",
   "settingsInsecureTlsDisabled": "已关闭忽略证书校验",
   "settingsInsecureTlsWarnTitle": "降低安全性",
@@ -2394,7 +2394,7 @@
   "settingsLogLevelError": "Error（仅错误）",
   "settingsLogLevelTitle": "日志等级",
   "settingsLogLevelDialogTitle": "选择日志等级",
-  "settingsLogLevelSwitched": "日志等级已���换为 {level}",
+  "settingsLogLevelSwitched": "日志等级已切换为 {level}",
   "@settingsLogLevelSwitched": {
     "placeholders": {
       "level": {

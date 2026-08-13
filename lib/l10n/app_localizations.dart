@@ -3719,7 +3719,7 @@ abstract class AppLocalizations {
   /// No description provided for @playlistBatchDeleteSongsConfirm.
   ///
   /// In zh, this message translates to:
-  /// **'确定要从曲库中删除选中的 {count} 首歌��吗？'**
+  /// **'确定要从曲库中删除选中的 {count} 首歌曲吗？'**
   String playlistBatchDeleteSongsConfirm(int count);
 
   /// No description provided for @playlistDeletedSongsCount.
@@ -6478,7 +6478,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsInsecureTlsSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'���接使用自签或无效 HTTPS 证书的服务器时开启。同时对接口请求和音频播放生效'**
+  /// **'连接使用自签或无效 HTTPS 证书的服务器时开启。同时对接口请求和音频播放生效'**
   String get settingsInsecureTlsSubtitle;
 
   /// No description provided for @settingsInsecureTlsEnabled.
@@ -6646,7 +6646,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLogLevelSwitched.
   ///
   /// In zh, this message translates to:
-  /// **'日志等级已���换为 {level}'**
+  /// **'日志等级已切换为 {level}'**
   String settingsLogLevelSwitched(String level);
 
   /// No description provided for @settingsExportLogsTitle.

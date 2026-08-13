@@ -220,7 +220,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             // API 地址输入框 — 嵌入模式下隐藏，独立部署时显示
                             if (!AppConfig.isEmbedded)
                               _buildApiUrlField(colorScheme),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 8),
+                            const Divider(),
+                            const SizedBox(height: 8),
 
                             // 同意协议勾选
                             _buildAgreementCheckbox(colorScheme),
@@ -399,14 +401,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget _buildInsecureTlsToggle() {
     final l10n = AppLocalizations.of(context);
     final enabled = ref.watch(insecureTlsProvider);
-    return CheckboxListTile(
+    return SwitchListTile(
       value: enabled,
       onChanged: (value) {
-        ref.read(insecureTlsProvider.notifier).setValue(value ?? false);
+        ref.read(insecureTlsProvider.notifier).setValue(value);
       },
       dense: true,
       contentPadding: EdgeInsets.zero,
-      controlAffinity: ListTileControlAffinity.leading,
       title: Text(l10n.settingsInsecureTlsTitle),
       subtitle: Text(l10n.settingsInsecureTlsSubtitle),
     );

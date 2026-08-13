@@ -2007,7 +2007,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String playlistBatchDeleteSongsConfirm(int count) {
-    return '确定要从曲库中删除选中的 $count 首歌��吗？';
+    return '确定要从曲库中删除选中的 $count 首歌曲吗？';
   }
 
   @override
@@ -3581,7 +3581,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsInsecureTlsSubtitle =>
-      '���接使用自签或无效 HTTPS 证书的服务器时开启。同时对接口请求和音频播放生效';
+      '连接使用自签或无效 HTTPS 证书的服务器时开启。同时对接口请求和音频播放生效';
 
   @override
   String get settingsInsecureTlsEnabled => '已开启忽略证书校验';
@@ -3673,7 +3673,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String settingsLogLevelSwitched(String level) {
-    return '日志等级已���换为 $level';
+    return '日志等级已切换为 $level';
   }
 
   @override
