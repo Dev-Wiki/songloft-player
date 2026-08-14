@@ -28,7 +28,6 @@ import '../../player/presentation/widgets/play_history_sheet.dart';
 import '../../settings/presentation/providers/cache_download_provider.dart';
 import '../../settings/presentation/providers/song_cache_provider.dart';
 import '../domain/playlist.dart';
-import '../domain/use_cases/playlist_sort.dart';
 import 'providers/playlist_provider.dart';
 import 'widgets/playlist_edit_dialog.dart';
 import 'widgets/playlist_search_field.dart';
@@ -211,132 +210,25 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage>
     }
   }
 
-  /// 自动按名称排序
-  Future<void> _autoSortByName(
-    List<Song> songs, {
-    bool ascending = true,
-  }) async {
-    // 排序需要全部歌曲在内存中
-    await ref.read(playlistSongsProvider(_playlistIdInt).notifier).loadAll();
-    if (!mounted) return;
-    final fullSongs =
-        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ?? songs;
-
-    // TODO(i18n): 启用中文拼音排序时，注入拼音比较器：
-    // PlaylistSort(compareStrings: lpinyinCompare)
-    final songIds = PlaylistSort().sortSongsByName(
-      fullSongs,
-      ascending: ascending,
-    );
-
-    if (songIds == null) {
-      if (mounted) {
-        ResponsiveSnackBar.show(
-          context,
-          message: AppLocalizations.of(context).playlistAlreadySortedSongs,
-        );
-      }
-      return;
-    }
-
+  /// 服务端自动排序（永久排序），无需客户端拉取全部歌曲。
+  Future<void> _autoSort(String action) async {
     final notifier = ref.read(playlistNotifierProvider.notifier);
-    final success = await notifier.reorderPlaylistSongs(
-      _playlistIdInt,
-      songIds,
-    );
+    final success = await notifier.sortPlaylistSongs(_playlistIdInt, action);
 
-    if (mounted) {
-      final l10n = AppLocalizations.of(context);
-      if (success) {
-        ref.read(playlistSongsProvider(_playlistIdInt).notifier).resetFilter();
-        ResponsiveSnackBar.showSuccess(
-          context,
-          message:
-              ascending
-                  ? l10n.playlistSortedByNameAsc
-                  : l10n.playlistSortedByNameDesc,
-        );
-      } else {
-        ResponsiveSnackBar.showError(context, message: l10n.playlistSortFailed);
-      }
-    }
-  }
-
-  /// 自动按数字前缀排序
-  Future<void> _autoSortByNumberPrefix(List<Song> songs) async {
-    // 排序需要全部歌曲在内存中
-    await ref.read(playlistSongsProvider(_playlistIdInt).notifier).loadAll();
     if (!mounted) return;
-    final fullSongs =
-        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ?? songs;
-
-    // TODO(i18n): 启用中文拼音排序时，注入拼音比较器：
-    // PlaylistSort(compareStrings: lpinyinCompare)
-    final songIds = PlaylistSort().sortSongsByNumberPrefix(fullSongs);
-
-    if (songIds == null) {
-      if (mounted) {
-        ResponsiveSnackBar.show(
-          context,
-          message: AppLocalizations.of(context).playlistAlreadySortedSongs,
-        );
-      }
-      return;
-    }
-
-    final notifier = ref.read(playlistNotifierProvider.notifier);
-    final success = await notifier.reorderPlaylistSongs(
-      _playlistIdInt,
-      songIds,
-    );
-
-    if (mounted) {
-      final l10n = AppLocalizations.of(context);
-      if (success) {
-        ref.read(playlistSongsProvider(_playlistIdInt).notifier).resetFilter();
-        ResponsiveSnackBar.showSuccess(
-          context,
-          message: l10n.playlistSortedByNumber,
-        );
-      } else {
-        ResponsiveSnackBar.showError(context, message: l10n.playlistSortFailed);
-      }
-    }
-  }
-
-  /// 随机打乱歌单内歌曲顺序
-  Future<void> _autoSortShuffle(List<Song> songs) async {
-    await ref.read(playlistSongsProvider(_playlistIdInt).notifier).loadAll();
-    if (!mounted) return;
-    final fullSongs =
-        ref.read(playlistSongsProvider(_playlistIdInt)).value?.items ?? songs;
-
-    final songIds = PlaylistSort().shuffleSongs(fullSongs);
-
-    if (songIds == null) {
-      if (mounted) {
-        ResponsiveSnackBar.show(
-          context,
-          message: AppLocalizations.of(context).playlistAlreadySortedSongs,
-        );
-      }
-      return;
-    }
-
-    final notifier = ref.read(playlistNotifierProvider.notifier);
-    final success = await notifier.reorderPlaylistSongs(
-      _playlistIdInt,
-      songIds,
-    );
-
-    if (mounted) {
-      final l10n = AppLocalizations.of(context);
-      if (success) {
-        ref.read(playlistSongsProvider(_playlistIdInt).notifier).resetFilter();
-        ResponsiveSnackBar.showSuccess(context, message: l10n.playlistShuffled);
-      } else {
-        ResponsiveSnackBar.showError(context, message: l10n.playlistSortFailed);
-      }
+    final l10n = AppLocalizations.of(context);
+    if (success) {
+      ref.read(playlistSongsProvider(_playlistIdInt).notifier).resetFilter();
+      final message = switch (action) {
+        'name_asc' => l10n.playlistSortedByNameAsc,
+        'name_desc' => l10n.playlistSortedByNameDesc,
+        'number_prefix' => l10n.playlistSortedByNumber,
+        'shuffle' => l10n.playlistShuffled,
+        _ => l10n.playlistSortSaved,
+      };
+      ResponsiveSnackBar.showSuccess(context, message: message);
+    } else {
+      ResponsiveSnackBar.showError(context, message: l10n.playlistSortFailed);
     }
   }
 
@@ -1199,16 +1091,16 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage>
                 break;
               // 永久排序
               case 'perm_name_asc':
-                _autoSortByName(songs, ascending: true);
+                _autoSort('name_asc');
                 break;
               case 'perm_name_desc':
-                _autoSortByName(songs, ascending: false);
+                _autoSort('name_desc');
                 break;
               case 'perm_number':
-                _autoSortByNumberPrefix(songs);
+                _autoSort('number_prefix');
                 break;
               case 'perm_shuffle':
-                _autoSortShuffle(songs);
+                _autoSort('shuffle');
                 break;
               case 'manual':
                 _enterSortMode(songs);

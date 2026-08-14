@@ -192,6 +192,15 @@ class PlaylistApi {
     );
   }
 
+  /// 服务端排序歌单内歌曲（永久排序）
+  /// POST /api/v1/playlists/{id}/songs/sort
+  Future<void> sortPlaylistSongs(int id, String action) async {
+    await dio.post(
+      '${AppConfig.apiPrefix}/playlists/$id/songs/sort',
+      data: {'action': action},
+    );
+  }
+
   /// 重新排序歌单
   /// PUT /api/v1/playlists/reorder
   Future<void> reorderPlaylists(List<int> playlistIds) async {

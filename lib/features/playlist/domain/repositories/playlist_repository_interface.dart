@@ -67,6 +67,9 @@ abstract class IPlaylistRepository {
   /// 重新排序歌单内歌曲
   Future<void> reorderPlaylistSongs(int id, List<int> songIds);
 
+  /// 服务端排序歌单内歌曲（永久排序）
+  Future<void> sortPlaylistSongs(int id, String action);
+
   /// 重新排序歌单
   Future<void> reorderPlaylists(List<int> playlistIds);
 
@@ -77,7 +80,11 @@ abstract class IPlaylistRepository {
   Future<void> touchPlaylist(int id);
 
   /// 更新歌单视图排序偏好
-  Future<void> updatePlaylistSort(int id, {required String sortBy, required String sortOrder});
+  Future<void> updatePlaylistSort(
+    int id, {
+    required String sortBy,
+    required String sortOrder,
+  });
 
   /// 设置歌单可见性
   Future<Playlist> setPlaylistVisibility(int id, {required bool hidden});

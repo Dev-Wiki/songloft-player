@@ -1,5 +1,4 @@
 import '../playlist.dart';
-import '../../../../shared/models/song.dart';
 
 /// 从文本中提取第一个出现的数字（支持开头和中间位置）。
 /// 例如: "04.校园故事" → 4, "干得漂亮 | 01 好意被辜负" → 1
@@ -38,50 +37,6 @@ class PlaylistSort {
   /// 默认比较器：大小写不敏感的 Unicode code point 顺序。
   static int _defaultCompare(String a, String b) =>
       a.toLowerCase().compareTo(b.toLowerCase());
-
-  /// 按歌曲名称排序，返回排序后的 song ID 列表。
-  /// 如果已经是目标顺序则返回 null（避免无效 API 调用）。
-  List<int>? sortSongsByName(List<Song> songs, {bool ascending = true}) {
-    final sorted = List<Song>.from(songs)..sort((a, b) {
-      final result = _compareStrings(a.title, b.title);
-      return ascending ? result : -result;
-    });
-
-    final sortedIds = sorted.map((s) => s.id).toList();
-    final originalIds = songs.map((s) => s.id).toList();
-
-    if (_listEquals(sortedIds, originalIds)) return null;
-    return sortedIds;
-  }
-
-  /// 按歌曲名称开头的数字排序（如 "01. xxx", "02. xxx"）。
-  /// 无数字前缀的歌曲排在有前缀的后面，二者内部再按名称字母序。
-  /// 已有序则返回 null。
-  List<int>? sortSongsByNumberPrefix(List<Song> songs) {
-    final sorted = List<Song>.from(songs)..sort((a, b) {
-      final numA = extractLeadingNumber(a.title);
-      final numB = extractLeadingNumber(b.title);
-
-      // 都有数字前缀：按数值排序
-      if (numA != null && numB != null) {
-        final cmp = numA.compareTo(numB);
-        if (cmp != 0) return cmp;
-        // 数值相同时按标题排序（使用自定义比较器）
-        return _compareStrings(a.title, b.title);
-      }
-      // 有数字前缀的排在前面
-      if (numA != null) return -1;
-      if (numB != null) return 1;
-      // 都没有数字前缀：按标题排序（使用自定义比较器）
-      return _compareStrings(a.title, b.title);
-    });
-
-    final sortedIds = sorted.map((s) => s.id).toList();
-    final originalIds = songs.map((s) => s.id).toList();
-
-    if (_listEquals(sortedIds, originalIds)) return null;
-    return sortedIds;
-  }
 
   /// 按歌单名称排序，返回排序后的 playlist ID 列表。
   /// 已有序则返回 null。
@@ -124,17 +79,6 @@ class PlaylistSort {
 
     if (_listEquals(sortedIds, originalIds)) return null;
     return sortedIds;
-  }
-
-  /// 随机打乱歌曲顺序，返回打乱后的 song ID 列表。
-  /// 仅当列表只有一首歌时返回 null（打乱无意义）。
-  List<int>? shuffleSongs(List<Song> songs) {
-    if (songs.length <= 1) return null;
-    final shuffled = List<Song>.from(songs)..shuffle();
-    final shuffledIds = shuffled.map((s) => s.id).toList();
-    final originalIds = songs.map((s) => s.id).toList();
-    if (_listEquals(shuffledIds, originalIds)) return null;
-    return shuffledIds;
   }
 
   /// 简单的整数列表比较（避免依赖 flutter/foundation 的 listEquals）。

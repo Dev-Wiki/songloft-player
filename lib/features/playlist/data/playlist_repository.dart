@@ -160,6 +160,15 @@ class PlaylistRepository implements IPlaylistRepository {
   }
 
   @override
+  Future<void> sortPlaylistSongs(int id, String action) async {
+    try {
+      await playlistApi.sortPlaylistSongs(id, action);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
   Future<void> reorderPlaylists(List<int> playlistIds) async {
     try {
       await playlistApi.reorderPlaylists(playlistIds);
@@ -187,9 +196,17 @@ class PlaylistRepository implements IPlaylistRepository {
   }
 
   @override
-  Future<void> updatePlaylistSort(int id, {required String sortBy, required String sortOrder}) async {
+  Future<void> updatePlaylistSort(
+    int id, {
+    required String sortBy,
+    required String sortOrder,
+  }) async {
     try {
-      await playlistApi.updatePlaylistSort(id, sortBy: sortBy, sortOrder: sortOrder);
+      await playlistApi.updatePlaylistSort(
+        id,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+      );
     } on DioException catch (e) {
       throw _handleError(e);
     }
