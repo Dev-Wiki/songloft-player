@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -132,7 +132,11 @@ class _MobilePlayerState extends ConsumerState<MobilePlayer>
       body: Stack(
         children: [
           // 背景模糊封面 / 无封面时的动态渐变
-          if (coverUrl != null)
+          // 注意：Windows 平台（WebF 渲染引擎）上 ImageFiltered.blur 会创建
+          // 过大的 saveLayer 导致 Stack 后续子层不渲染，故 Windows 上跳过
+          // 模糊封面，改用取色渐变（songloft-org/songloft#382）。
+          if (coverUrl != null &&
+              (kIsWeb || defaultTargetPlatform != TargetPlatform.windows))
             Positioned.fill(
               child: ClipRect(
                 child: ExcludeSemantics(
