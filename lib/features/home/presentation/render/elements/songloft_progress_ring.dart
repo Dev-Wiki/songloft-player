@@ -157,13 +157,19 @@ class _SongloftProgressRingState extends WebFWidgetElementState {
     return fallback;
   }
 
+  /// 取**解析后的像素**（`computedValue`），不是声明值（`value`）。
+  ///
+  /// `value` 存的是声明值：`width: 100%` 那里是 `1.0`，当 px 用会画出 1×1 的
+  /// 环（元素布局盒仍正常，只是画出来的东西小到看不见）。同一个坑在
+  /// `songloft_slider.dart` 里更致命 —— 它连可命中区域一起塌成 1 像素，
+  /// 滑块彻底拖不动，详见那边 `_resolveSide` 的注释。
   double _resolveSide(CSSLengthValue length) {
     if (length.isAuto) return SongloftProgressRingElement.defaultSize;
-    final double? value = length.value;
-    if (value == null || !value.isFinite || value <= 0) {
+    final double computed = length.computedValue;
+    if (!computed.isFinite || computed <= 0) {
       return SongloftProgressRingElement.defaultSize;
     }
-    return value;
+    return computed;
   }
 
   @override

@@ -342,8 +342,7 @@ class _SongloftSliderState extends WebFWidgetElementState {
         widgetElement.dispatchEvent(dom.InputEvent(inputType: '', data: data));
       }
       if (change) {
-        widgetElement
-            .dispatchEvent(dom.CustomEvent('change', detail: data));
+        widgetElement.dispatchEvent(dom.CustomEvent('change', detail: data));
       }
     } catch (e) {
       debugPrint('[plugin][$kSongloftSliderTag] dispatchEvent 失败: $e');
@@ -400,11 +399,34 @@ class _SongloftSliderState extends WebFWidgetElementState {
     return fallback;
   }
 
+  /// 解析单边尺寸：取 CSS **解析后的像素**（`computedValue`），`auto` 走默认值。
+  ///
+  /// **绝不能读 `CSSLengthValue.value`**（这是「滑块拖不动」的根因）：那是**声明
+  /// 值**而不是像素。`width: 100%` 在那里存的是 `1.0`（百分比按 0~1 存），解析后
+  /// 的像素在 `computedValue`。旧代码把 `1.0` 当 px 用，于是 `CustomPaint` 只有
+  /// 1×1 —— 元素的布局盒仍然正常（实测 402×28，布局与绘制都不受影响），但
+  /// Flutter 侧的可命中区域只剩左上角那**一个像素**，`GestureDetector` 几乎不可能
+  /// 被点到，表现就是**滑块完全拖不动、连点击定位都没有**。miot 的进度条
+  /// `.player-seek-input` 正是 `width/height: 100%`，实测
+  /// `cssW=CSSLengthValue(value: 1.0, unit: PERCENTAGE, computedValue: 402.0)`
+  /// 而 `size=Size(1.0, 1.0)`。
+  ///
+  /// 这里给出的只是**首选**尺寸：`RenderCustomPaint` 还会 `constraints.constrain`
+  /// 一次，而 `_SliderPainter.paint` 与 [_hitSize] 用的都是**最终盒子**的尺寸，
+  /// 所以 WebF 把子约束收成 tight 时（`width: 28px` 实测 tight `w=28,h=112`；
+  /// 弹性布局里的内联音量滑块实测 tight `w=160`，而它的 `computedValue` 是上一趟
+  /// 布局残留的 292.5）绘制与命中换算仍然对齐，不会因为首选值偏大而错位。
+  ///
+  /// 刻意**不用 `LayoutBuilder`** 去读约束（那样能拿到最权威的尺寸）：WebF 的
+  /// `RenderWidget.computeM(in|ax)Intrinsic*` 会把 intrinsic 查询**转发给子节点**
+  /// （`rendering/widget.dart:546-641`），而 `LayoutBuilder` 对 intrinsic 查询在
+  /// debug 下直接抛断言。auto 尺寸的 `<songloft-slider>`（inline-block，靠 intrinsic
+  /// 定宽）会因此崩在布局里。
   double _resolveSide(CSSLengthValue length, double fallback) {
     if (length.isAuto) return fallback;
-    final double? value = length.value;
-    if (value == null || !value.isFinite || value <= 0) return fallback;
-    return value;
+    final double computed = length.computedValue;
+    if (!computed.isFinite || computed <= 0) return fallback;
+    return computed;
   }
 
   @override
@@ -414,24 +436,6 @@ class _SongloftSliderState extends WebFWidgetElementState {
     if (renderStyle.display == CSSDisplay.none) return const SizedBox.shrink();
 
     final bool vertical = widgetElement.isVertical;
-    // 尺寸取 CSS width/height（与进度环同一套做法：读 renderStyle 而不是
-    // LayoutBuilder —— auto 尺寸下约束是无界的，CustomPaint 必须自己给出确定 size）。
-    // 兜底值按朝向分配主轴/交叉轴，否则竖向滑块在没写 CSS 时会是个 160 宽的横条。
-    final double width = _resolveSide(
-      renderStyle.width,
-      vertical
-          ? SongloftSliderElement.defaultCrossSize
-          : SongloftSliderElement.defaultMainSize,
-    );
-    final double height = _resolveSide(
-      renderStyle.height,
-      vertical
-          ? SongloftSliderElement.defaultMainSize
-          : SongloftSliderElement.defaultCrossSize,
-    );
-    final Size size = Size(width, height);
-    _cssSize = size;
-
     final bool disabled = widgetElement.isDisabled;
     final double lo = _min;
     final double hi = _max;
@@ -453,6 +457,22 @@ class _SongloftSliderState extends WebFWidgetElementState {
         alpha: track.a * SongloftSliderElement.disabledAlphaFactor,
       );
     }
+
+    // 兜底值按朝向分配主轴/交叉轴，否则竖向滑块在没写 CSS 时会是个 160 宽的横条。
+    final double width = _resolveSide(
+      renderStyle.width,
+      vertical
+          ? SongloftSliderElement.defaultCrossSize
+          : SongloftSliderElement.defaultMainSize,
+    );
+    final double height = _resolveSide(
+      renderStyle.height,
+      vertical
+          ? SongloftSliderElement.defaultMainSize
+          : SongloftSliderElement.defaultCrossSize,
+    );
+    final Size size = Size(width, height);
+    _cssSize = size;
 
     final Widget painted = CustomPaint(
       size: size,
