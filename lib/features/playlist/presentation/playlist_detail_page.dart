@@ -110,14 +110,6 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage>
         return;
       }
       ref.read(playlistSongsProvider(_playlistIdInt).notifier).search(value);
-      // 搜索触发后 provider 状态变更会引发 widget tree rebuild，
-      // Windows 上 TextField 可能因此丢失焦点，补一个 post-frame 重聚焦。
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !_isSearchMode) return;
-        if (!_searchFocusNode.hasFocus) {
-          _searchFocusNode.requestFocus();
-        }
-      });
     });
   }
 
@@ -136,24 +128,6 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage>
         _searchFocusNode.unfocus();
         ref.read(playlistSongsProvider(_playlistIdInt).notifier).search('');
       }
-    });
-    // 打开搜索后，用多帧重试确保焦点最终落在 TextField 上。
-    // Windows 上 setState 触发 rebuild 后 AppBar 按钮可能仍持有焦点，
-    // 单靠 autofocus + _ensureFocus 的 5 帧重试不够，此处再补一个 15 帧窗口。
-    if (_isSearchMode) {
-      _retrySearchFocus(0);
-    }
-  }
-
-  /// 打开搜索后的多帧重试聚焦，补偿 AppBar 按钮抢占焦点。
-  /// 最多 15 帧（约 250ms），覆盖 Windows 平台焦点延迟。
-  void _retrySearchFocus(int attempt) {
-    if (attempt >= 15 || !mounted || !_isSearchMode) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_isSearchMode) return;
-      if (_searchFocusNode.hasFocus) return;
-      _searchFocusNode.requestFocus();
-      _retrySearchFocus(attempt + 1);
     });
   }
 

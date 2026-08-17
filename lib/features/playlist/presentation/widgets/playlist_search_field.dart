@@ -51,13 +51,8 @@ class _PlaylistSearchFieldState extends State<PlaylistSearchField> {
       _ensureFocus();
     } else if (widget.visible) {
       // 父级 rebuild 后（如搜索触发 provider 状态变更），TextField 可能丢失焦点，
-      // 但 visible 并未变化，此处补一个轻量聚焦确保输入不中断。
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !widget.visible) return;
-        if (!widget.focusNode.hasFocus) {
-          widget.focusNode.requestFocus();
-        }
-      });
+      // 但 visible 并未变化。使用多帧重试确保输入不中断，覆盖 Windows 平台焦点延迟。
+      _ensureFocus();
     }
   }
 
@@ -76,13 +71,13 @@ class _PlaylistSearchFieldState extends State<PlaylistSearchField> {
 
   /// 在 autofocus 之后的若干帧验证焦点是否成功，不成功则重试。
   /// Windows 上 autofocus 可能因为 AppBar 按钮持有平台焦点而失败。
-  /// 重试间隔 1 帧，最多 5 次，覆盖首次打开与父级 rebuild 后焦点丢失。
+  /// 重试间隔 1 帧，最多 10 次，覆盖首次打开与父级 rebuild 后焦点丢失。
   void _ensureFocus() {
     _retryFocus(0);
   }
 
   void _retryFocus(int attempt) {
-    if (attempt >= 5) return;
+    if (attempt >= 10) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.visible) return;
       if (widget.focusNode.hasFocus) return;
