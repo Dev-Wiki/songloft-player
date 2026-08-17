@@ -399,15 +399,18 @@ class BrowseCard extends StatelessWidget {
 
   /// grid 用：填满 AspectRatio 的封面（CoverImage 是定尺寸，这里需要 fill）。
   Widget _buildCoverFill(BuildContext context) {
+    // 网格封面通常显示 150-200 逻辑像素，按 3x DPR 给 600px 缩略图。
+    const decodeWidth = 600;
     final url =
         coverUrl != null && coverUrl!.isNotEmpty
-            ? UrlHelper.buildCoverUrl(coverUrl!)
+            ? UrlHelper.buildCoverUrl(coverUrl!, width: decodeWidth)
             : null;
     if (url == null) return _buildPlaceholder(context, iconSize: 48);
     return ExcludeSemantics(
       child: NetworkCoverImage(
         imageUrl: url,
         fit: BoxFit.cover,
+        decodeWidth: decodeWidth,
         placeholder: (context, url) => _buildPlaceholder(context, iconSize: 48),
         errorWidget:
             (context, url, error) => _buildPlaceholder(context, iconSize: 48),

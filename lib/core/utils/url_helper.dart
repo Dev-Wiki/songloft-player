@@ -121,25 +121,26 @@ class UrlHelper {
 
   /// 构建封面图片 URL（兼容旧接口，内部调用 buildResourceUrl）
   ///
-  /// [width] 非空时（且仅 Web 生效），给「本机后端封面端点」追加 `?w=<物理像素>` 服务端
-  /// 缩略参数：Web 端封面改走浏览器原生 `<img>`（HtmlImage）路径以规避 HttpGet +
-  /// flutter_cache_manager web 内存管线的「滚回/队列重建时静默 stall」重显示 bug；而
-  /// `<img>` 会按图片**固有尺寸**上传 GPU 纹理、`memCacheWidth` 在该路径不生效，故改由
-  /// 服务端把封面缩到显示尺寸，既拿回浏览器缓存的稳健重显示，又保住移动端小纹理（不再
-  /// 顶爆 WebGL 显存变黑）。外部封面 URL（CDN）不追加。见 songloft-org/songloft#309。
+  /// [width] 非空时，给「本机后端封面端点」追加 `?w=<物理像素>` 服务端缩略参数。
+  /// 全平台生效：服务端将封面等比缩放后以 JPEG 返回，大幅降低网络传输与客户端解码开销，
+  /// 避免弱网/NAS 拥堵场景下全尺寸封面并发下载触发 ANR（songloft-org/songloft-player#39）。
+  /// 外部封面 URL（CDN）不追加。
   static String buildCoverUrl(String coverUrl, {int? width}) {
     final url = buildResourceUrl(coverUrl);
     if (width != null) return appendCoverWidth(url, width);
     return url;
   }
 
-  /// 给**已构建**的本机后端封面 URL 追加 `?w=` 缩略参数（仅 Web、仅本机后端 URL 生效）。
+  /// 给**已构建**的本机后端封面 URL 追加 `?w=` 缩略参数（全平台生效）。
+  ///
+  /// 服务端据 `?w=` 将封面等比缩放后以 JPEG 返回，大幅降低网络传输体积与客户端解码开销。
+  /// 原生平台也走此路径：弱网/NAS 拥堵场景下，全尺寸封面（3~4MB）并发下载 + 主线程解码
+  /// 会触发 ANR（songloft-org/songloft-player#39）。
   ///
   /// 供直接持有成品 URL 的场景复用（如 [NetworkCoverImage] 的调用方已 `buildCoverUrl`
-  /// 过）。外部封面（http/https CDN）与非 Web 平台原样返回，避免破坏其缓存键/签名或改变
-  /// 原生画质。已带 `w=` 的不重复追加。
+  /// 过）。外部封面（http/https CDN）原样返回，避免破坏其缓存键/签名。已带 `w=` 的不重复追加。
   static String appendCoverWidth(String url, int width) {
-    if (!kIsWeb || url.isEmpty || width <= 0) return url;
+    if (url.isEmpty || width <= 0) return url;
     if (!_isLocalBackendUrl(url)) return url;
     if (RegExp(r'[?&]w=').hasMatch(url)) return url;
     final separator = url.contains('?') ? '&' : '?';

@@ -143,7 +143,7 @@ class _MobilePlayerState extends ConsumerState<MobilePlayer>
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
                     child: Image.network(
-                      UrlHelper.buildCoverUrl(coverUrl),
+                      UrlHelper.buildCoverUrl(coverUrl, width: 50),
                       fit: BoxFit.cover,
                       cacheWidth: 50,
                       errorBuilder:
@@ -582,6 +582,8 @@ class _MobilePlayerState extends ConsumerState<MobilePlayer>
     CoverPalette? palette,
   }) {
     final theme = Theme.of(context);
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final decodeWidth = (size * dpr).clamp(64.0, 1024.0).round();
 
     final glowColor = palette?.vibrantColor ?? palette?.dominantColor;
 
@@ -601,8 +603,9 @@ class _MobilePlayerState extends ConsumerState<MobilePlayer>
           coverUrl != null
               ? ExcludeSemantics(
                 child: Image.network(
-                  UrlHelper.buildCoverUrl(coverUrl),
+                  UrlHelper.buildCoverUrl(coverUrl, width: decodeWidth),
                   fit: BoxFit.cover,
+                  cacheWidth: decodeWidth,
                   errorBuilder: (_, _, _) => _buildPlaceholder(theme, size),
                 ),
               )

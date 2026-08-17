@@ -224,6 +224,9 @@ class MiniPlayer extends ConsumerWidget {
 
   Widget _buildCover(BuildContext context, String? coverUrl) {
     final theme = Theme.of(context);
+    // 48px 显示尺寸，按 3x DPR 给 144px 缩略图。弱网/NAS 拥堵时全尺寸封面（3~4MB）
+    // 下载会阻塞主线程触发 ANR（songloft-org/songloft-player#39）。
+    const decodeWidth = 144;
 
     return Container(
       width: 48,
@@ -237,8 +240,9 @@ class MiniPlayer extends ConsumerWidget {
           coverUrl != null && coverUrl.isNotEmpty
               ? ExcludeSemantics(
                 child: Image.network(
-                  UrlHelper.buildCoverUrl(coverUrl),
+                  UrlHelper.buildCoverUrl(coverUrl, width: decodeWidth),
                   fit: BoxFit.cover,
+                  cacheWidth: decodeWidth,
                   errorBuilder: (_, _, _) => _buildPlaceholder(theme),
                 ),
               )
