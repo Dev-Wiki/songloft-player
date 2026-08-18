@@ -98,6 +98,7 @@ class PlayerState {
   final Duration currentTime;
   final Duration duration;
   final PlayMode playMode;
+  final double speed; // 播放速度 (0.5 - 2.0)
   final bool isBuffering;
   final bool showFullPlayer; // 移动端全屏播放器
   final bool showPlaylistDrawer; // 播放列表抽屉
@@ -125,6 +126,7 @@ class PlayerState {
     this.currentTime = Duration.zero,
     this.duration = Duration.zero,
     this.playMode = PlayMode.order,
+    this.speed = 1.0,
     this.isBuffering = false,
     this.showFullPlayer = false,
     this.showPlaylistDrawer = false,
@@ -201,6 +203,7 @@ class PlayerState {
     Duration? currentTime,
     Duration? duration,
     PlayMode? playMode,
+    double? speed,
     bool? isBuffering,
     bool? showFullPlayer,
     bool? showPlaylistDrawer,
@@ -227,6 +230,7 @@ class PlayerState {
       currentTime: currentTime ?? this.currentTime,
       duration: duration ?? this.duration,
       playMode: playMode ?? this.playMode,
+      speed: speed ?? this.speed,
       isBuffering: isBuffering ?? this.isBuffering,
       showFullPlayer: showFullPlayer ?? this.showFullPlayer,
       showPlaylistDrawer: showPlaylistDrawer ?? this.showPlaylistDrawer,

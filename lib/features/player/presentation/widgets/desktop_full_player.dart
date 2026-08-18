@@ -622,6 +622,15 @@ class _DesktopFullPlayerState extends ConsumerState<DesktopFullPlayer>
             onPlayModeChanged: notifier.setPlayMode,
           ),
         ),
+        // 播放速度
+        SizedBox(
+          width: 48,
+          height: 48,
+          child: PopupSpeedControl(
+            speed: state.speed,
+            onSpeedChanged: notifier.setSpeed,
+          ),
+        ),
         // 投屏（Web 无 DLNA，CastButton 返回空占位；显式 kIsWeb 门控，
         // 避免固定 48×48 盒在 spaceAround 下留出空槽导致按钮分布不均）
         if (!kIsWeb)

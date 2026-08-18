@@ -964,6 +964,14 @@ class PlayerNotifier extends Notifier<PlayerState> {
     }
   }
 
+  /// 设置播放速度
+  Future<void> setSpeed(double speed) async {
+    final clampedSpeed = speed.clamp(0.5, 2.0);
+    state = state.copyWith(speed: clampedSpeed);
+    await _audioHandler.setSpeed(clampedSpeed);
+    debugPrint('[Player] Set speed: ${clampedSpeed}x');
+  }
+
   /// 切换静音
   Future<void> toggleMute() async {
     if (state.isMuted) {

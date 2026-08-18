@@ -278,6 +278,203 @@ class _PlayModeOverlayPanel extends StatelessWidget {
   }
 }
 
+/// 播放速度弹出控制组件
+class PopupSpeedControl extends StatefulWidget {
+  final double speed;
+  final ValueChanged<double> onSpeedChanged;
+
+  const PopupSpeedControl({
+    super.key,
+    required this.speed,
+    required this.onSpeedChanged,
+  });
+
+  @override
+  State<PopupSpeedControl> createState() => _PopupSpeedControlState();
+}
+
+class _PopupSpeedControlState extends State<PopupSpeedControl> {
+  final GlobalKey _buttonKey = GlobalKey();
+  OverlayEntry? _overlayEntry;
+
+  void _showSpeedPanel() {
+    _removeOverlay();
+
+    final RenderBox? renderBox =
+        _buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final position = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    _overlayEntry = OverlayEntry(
+      builder:
+          (context) => _SpeedOverlayPanel(
+            speed: widget.speed,
+            onSpeedChanged: (s) {
+              widget.onSpeedChanged(s);
+              _removeOverlay();
+            },
+            onDismiss: _removeOverlay,
+            anchorPosition: position,
+            anchorSize: size,
+          ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return IconButton(
+      key: _buttonKey,
+      onPressed: _showSpeedPanel,
+      icon: Icon(
+        Icons.speed_rounded,
+        size: 20,
+        color: widget.speed != 1.0 ? theme.colorScheme.primary : null,
+      ),
+      tooltip: l10n.playerSpeedTitle,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+/// 播放速度弹出面板
+class _SpeedOverlayPanel extends StatelessWidget {
+  final double speed;
+  final ValueChanged<double> onSpeedChanged;
+  final VoidCallback onDismiss;
+  final Offset anchorPosition;
+  final Size anchorSize;
+
+  const _SpeedOverlayPanel({
+    required this.speed,
+    required this.onSpeedChanged,
+    required this.onDismiss,
+    required this.anchorPosition,
+    required this.anchorSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenSize = MediaQuery.sizeOf(context);
+    final l10n = AppLocalizations.of(context);
+
+    const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+
+    final itemHeight = context.responsive<double>(
+      mobile: 44,
+      tablet: 48,
+      desktop: 48,
+    );
+    final panelWidth = context.responsive<double>(
+      mobile: 120,
+      tablet: 140,
+      desktop: 140,
+    );
+    final fontSize = context.responsive<double>(
+      mobile: 14,
+      tablet: 14,
+      desktop: 14,
+    );
+
+    final panelHeight = speeds.length * itemHeight + 16;
+
+    double left = anchorPosition.dx + anchorSize.width / 2 - panelWidth / 2;
+    if (left < 16) left = 16;
+    if (left + panelWidth > screenSize.width - 16) {
+      left = screenSize.width - panelWidth - 16;
+    }
+
+    double top = anchorPosition.dy - panelHeight - 8;
+    final safeAreaTop = MediaQuery.paddingOf(context).top;
+    if (top < safeAreaTop + 16) {
+      top = anchorPosition.dy + anchorSize.height + 8;
+    }
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Semantics(
+            label: l10n.playerClose,
+            child: GestureDetector(
+              onTap: onDismiss,
+              behavior: HitTestBehavior.opaque,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+        ),
+        Positioned(
+          left: left,
+          top: top,
+          child: Material(
+            elevation: 8,
+            borderRadius: BorderRadius.circular(12),
+            color: theme.colorScheme.surfaceContainerHigh,
+            child: Container(
+              width: panelWidth,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: FocusScope(
+                autofocus: true,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final s in speeds)
+                      Semantics(
+                        button: true,
+                        selected: speed == s,
+                        child: InkWell(
+                          onTap: () => onSpeedChanged(s),
+                          child: Container(
+                            width: double.infinity,
+                            height: itemHeight,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              s == 1.0 ? l10n.playerSpeedNormal : '${s}x',
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                color:
+                                    speed == s
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                fontWeight:
+                                    speed == s
+                                        ? FontWeight.w500
+                                        : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// 睡眠定时入口按钮：桌面/平板用按钮上方浮层；移动端用底部抽屉 BottomSheet
 class PopupSleepTimerControl extends StatefulWidget {
   final SleepTimerStatus? status;

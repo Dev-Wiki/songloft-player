@@ -900,6 +900,11 @@
   "playerModeSingle": "单曲循环",
   "playerModeRandom": "随机播放",
   "playerModeSinglePlay": "单曲播放",
+
+  "playerSpeed": "倍速",
+  "playerSpeedTitle": "播放速度",
+  "playerSpeedNormal": "正常",
+
   "playerClose": "关闭",
   "playerSleepTimer": "睡眠定时",
   "playerSleepTimerWithStatus": "睡眠定时：{status}",

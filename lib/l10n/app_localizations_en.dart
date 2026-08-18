@@ -1448,6 +1448,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerModeSinglePlay => 'Play once';
 
   @override
+  String get playerSpeed => 'Speed';
+
+  @override
+  String get playerSpeedTitle => 'Playback speed';
+
+  @override
+  String get playerSpeedNormal => 'Normal';
+
+  @override
   String get playerClose => 'Close';
 
   @override

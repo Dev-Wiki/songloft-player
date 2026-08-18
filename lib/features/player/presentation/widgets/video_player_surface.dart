@@ -479,6 +479,11 @@ class _VideoPlayerSurfaceState extends ConsumerState<VideoPlayerSurface> {
                 onVolumeChanged: notifier.setVolume,
               ),
               const SizedBox(width: 8),
+              PopupSpeedControl(
+                speed: state.speed,
+                onSpeedChanged: notifier.setSpeed,
+              ),
+              const SizedBox(width: 8),
               IconButton(
                 onPressed: () => QueueBottomSheet.show(context),
                 icon: const Icon(Icons.queue_music_rounded, size: 20),

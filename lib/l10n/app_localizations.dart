@@ -2636,6 +2636,24 @@ abstract class AppLocalizations {
   /// **'单曲播放'**
   String get playerModeSinglePlay;
 
+  /// No description provided for @playerSpeed.
+  ///
+  /// In zh, this message translates to:
+  /// **'倍速'**
+  String get playerSpeed;
+
+  /// No description provided for @playerSpeedTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'播放速度'**
+  String get playerSpeedTitle;
+
+  /// No description provided for @playerSpeedNormal.
+  ///
+  /// In zh, this message translates to:
+  /// **'正常'**
+  String get playerSpeedNormal;
+
   /// No description provided for @playerClose.
   ///
   /// In zh, this message translates to:

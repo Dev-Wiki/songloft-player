@@ -795,6 +795,10 @@
   "playerModeSingle": "Repeat one",
   "playerModeRandom": "Shuffle",
   "playerModeSinglePlay": "Play once",
+
+  "playerSpeed": "Speed",
+  "playerSpeedTitle": "Playback speed",
+  "playerSpeedNormal": "Normal",
   "playerClose": "Close",
   "playerSleepTimer": "Sleep timer",
   "playerSleepTimerWithStatus": "Sleep timer: {status}",

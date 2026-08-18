@@ -690,6 +690,10 @@ class _MobilePlayerState extends ConsumerState<MobilePlayer>
             volume: state.volume,
             onVolumeChanged: notifier.setVolume,
           ),
+          PopupSpeedControl(
+            speed: state.speed,
+            onSpeedChanged: notifier.setSpeed,
+          ),
           IconButton(
             onPressed: () => QueueBottomSheet.show(context),
             icon: const Icon(Icons.queue_music_rounded, size: 20),

@@ -358,6 +358,7 @@ class DesktopPlayer extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildPlayModeButton(context, state, notifier, theme),
+              _buildSpeedButton(context, state, notifier, theme),
               Flexible(child: volume),
               ...actions,
             ],
@@ -370,6 +371,7 @@ class DesktopPlayer extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildPlayModeButton(context, state, notifier, theme),
+              _buildSpeedButton(context, state, notifier, theme),
               // 无界约束下 ResponsiveVolumeControl 自动退化为弹出图标
               volume,
               ...actions,
@@ -390,6 +392,19 @@ class DesktopPlayer extends ConsumerWidget {
     return PopupPlayModeControl(
       playMode: state.playMode,
       onPlayModeChanged: notifier.setPlayMode,
+    );
+  }
+
+  /// 构建播放速度按钮（使用自定义弹出层）
+  Widget _buildSpeedButton(
+    BuildContext context,
+    PlayerState state,
+    PlayerNotifier notifier,
+    ThemeData theme,
+  ) {
+    return PopupSpeedControl(
+      speed: state.speed,
+      onSpeedChanged: notifier.setSpeed,
     );
   }
 

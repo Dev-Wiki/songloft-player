@@ -1412,6 +1412,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerModeSinglePlay => '单曲播放';
 
   @override
+  String get playerSpeed => '倍速';
+
+  @override
+  String get playerSpeedTitle => '播放速度';
+
+  @override
+  String get playerSpeedNormal => '正常';
+
+  @override
   String get playerClose => '关闭';
 
   @override
