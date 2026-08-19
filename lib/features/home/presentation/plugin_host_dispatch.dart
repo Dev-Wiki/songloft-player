@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../config/app_config.dart';
 import '../../../shared/models/song.dart';
+import '../../library/presentation/providers/favorite_provider.dart';
 import '../../library/presentation/providers/songs_provider.dart';
 import '../../player/domain/player_state.dart';
 import '../../player/presentation/providers/player_provider.dart';
@@ -80,6 +81,29 @@ class PluginHostDispatcher {
           };
       }
       throw Exception('unknown host method: $method');
+    }
+
+    if (ns == 'favorite') {
+      switch (method) {
+        case 'refresh':
+          final notifier = ref.read(favoriteProvider.notifier);
+          final songId = (p['songId'] as num?)?.toInt();
+          final isFavorited = p['isFavorited'] as bool?;
+          if (songId != null && isFavorited != null) {
+            final current = ref.read(favoriteProvider);
+            final updatedIds = Set<int>.from(current.favoriteSongIds);
+            if (isFavorited) {
+              updatedIds.add(songId);
+            } else {
+              updatedIds.remove(songId);
+            }
+            notifier.updateFavoriteIds(updatedIds);
+          } else {
+            notifier.initialize();
+          }
+          return null;
+      }
+      throw Exception('unknown favorite method: $method');
     }
 
     if (ns == 'player') {

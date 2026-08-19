@@ -266,6 +266,12 @@ class FavoriteNotifier extends Notifier<FavoriteState> {
   bool isRadioFavorite(int radioId) =>
       _radioFavoriteService.isFavorite(radioId);
 
+  /// 外部更新歌曲收藏 ID 集合（供宿主桥接插件通知使用）
+  void updateFavoriteIds(Set<int> ids) {
+    _songFavoriteService.updateIds(ids);
+    state = state.copyWith(favoriteSongIds: ids);
+  }
+
   /// 清除错误
   void clearError() {
     state = state.copyWith(clearError: true);

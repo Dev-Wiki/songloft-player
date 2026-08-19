@@ -113,6 +113,13 @@ class FavoriteService {
       ..addAll(ids);
   }
 
+  /// Directly update the favorite IDs set (used by host bridge notifications).
+  void updateIds(Set<int> ids) {
+    _favoriteIds
+      ..clear()
+      ..addAll(ids);
+  }
+
   /// Reset internal state (useful when user logs out).
   void reset() {
     _favoriteIds.clear();

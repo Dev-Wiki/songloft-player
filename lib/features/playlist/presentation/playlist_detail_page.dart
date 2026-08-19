@@ -387,6 +387,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage>
         onRefresh: () async {
           ref.invalidate(playlistDetailProvider(_playlistIdInt));
           ref.invalidate(playlistSongsProvider(_playlistIdInt));
+          await ref.read(playlistDetailProvider(_playlistIdInt).future);
         },
         child: playlistAsync.when(
           data: (playlist) => _buildContent(context, playlist, songsAsync),
@@ -454,6 +455,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage>
 
     final scrollView = CustomScrollView(
       controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
       // Web 端收紧离屏预解码范围，降低超大歌单封面 GPU 纹理累积（原生端为 null 保持默认）。
       scrollCacheExtent: webListCacheExtent,
       slivers: [
@@ -736,6 +738,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage>
         child: _wrapWithScrollOverlays(
           scrollContent: CustomScrollView(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             scrollCacheExtent: webListCacheExtent,
             slivers: [
               SliverToBoxAdapter(child: _buildSearchBar(context)),
