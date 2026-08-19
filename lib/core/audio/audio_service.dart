@@ -1092,6 +1092,7 @@ class SongloftAudioHandler extends BaseAudioHandler with SeekHandler {
       _player.setVolume(volume.clamp(0.0, 1.0));
 
   /// 设置播放速度 (0.5 - 2.0)
+  @override
   Future<void> setSpeed(double speed) =>
       _player.setSpeed(speed.clamp(0.5, 2.0));
 

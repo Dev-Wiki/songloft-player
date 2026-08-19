@@ -57,8 +57,9 @@ class NetworkCoverImage extends StatelessWidget {
         },
         errorBuilder: (context, error, stackTrace) {
           CoverDiagnostics.logError(resolvedUrl, error);
-          if (errorWidget != null)
+          if (errorWidget != null) {
             return errorWidget!(context, resolvedUrl, error);
+          }
           return const SizedBox.shrink();
         },
       );

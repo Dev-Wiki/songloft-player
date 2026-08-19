@@ -73,7 +73,7 @@ void main() {
           }
 
           // Next call should reset and avoid current index
-          final currentIndex = 1;
+          const currentIndex = 1;
           final results = <int>{};
           // Run multiple times to verify it doesn't always return currentIndex
           for (var i = 0; i < 20; i++) {

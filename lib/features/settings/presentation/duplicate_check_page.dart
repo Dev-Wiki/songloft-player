@@ -748,8 +748,9 @@ class _DuplicateCheckPageState extends ConsumerState<DuplicateCheckPage> {
                 RadioGroup<int>(
                   groupValue: keepId,
                   onChanged: (v) {
-                    if (v != null)
+                    if (v != null) {
                       setState(() => _selectedKeep[groupIndex] = v);
+                    }
                   },
                   child: Column(
                     children: [

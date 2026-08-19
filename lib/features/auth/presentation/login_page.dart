@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../config/app_config.dart';
-import '../../../core/theme/responsive.dart';
 import '../../../core/backend/embedded_backend_service.dart';
 import '../../../core/backend/run_mode_provider.dart';
 import '../../../core/network/base_url_provider.dart';
@@ -41,8 +40,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _agreedToTerms = false;
   bool _isLocalModeBootstrapping = false;
   String _localModeHint = '';
-
-  bool get _isApiUrlVisible => !AppConfig.isEmbedded;
 
   @override
   void initState() {
