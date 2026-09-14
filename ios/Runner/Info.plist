@@ -37,6 +37,8 @@
 	</dict>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>本地模式播放时，需要访问局域网内的设备（如小爱音箱）以支持投屏功能。</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

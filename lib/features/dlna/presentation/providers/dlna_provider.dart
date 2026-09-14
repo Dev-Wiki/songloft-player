@@ -3,6 +3,7 @@ import 'package:dlna_dart/xmlParser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/audio/audio_service.dart';
+import '../../../../core/network/lan_address.dart';
 import '../../../../core/utils/audio_format_helper.dart';
 import '../../../../core/utils/url_helper.dart';
 import '../../../../main.dart';
@@ -14,6 +15,21 @@ import '../../domain/dlna_state.dart';
 
 /// 一次投屏所需的参数：资源 URL + DIDL mime 类型。
 typedef _CastArgs = ({String url, PlayType mime});
+
+/// 把投屏 URL 的 host 从回环地址换成局域网地址。
+///
+/// Bundle 本地模式下播放 URL 的 host 固定是 127.0.0.1（App 自己访问用，性能最优）；
+/// 但投屏 URL 要交给局域网内的外部渲染器（DLNA 设备），回环地址对它们无意义，
+/// 必须换成本机真正的局域网 IP。非本地模式（host 已是真实服务器地址）时原样返回。
+Future<String> _toCastReachableUrl(String url) async {
+  final uri = Uri.tryParse(url);
+  if (uri == null || (uri.host != '127.0.0.1' && uri.host != 'localhost')) {
+    return url;
+  }
+  final lanIp = await LanAddress.resolve();
+  if (lanIp == null) return url;
+  return uri.replace(host: lanIp).toString();
+}
 
 /// 按歌曲真实格式挑选投屏参数。
 ///
@@ -155,12 +171,8 @@ class DlnaNotifier extends Notifier<DlnaState> {
 
     try {
       final args = _castArgsFor(song);
-      await _service.castTo(
-        device.id,
-        args.url,
-        title: song.title,
-        mime: args.mime,
-      );
+      final url = await _toCastReachableUrl(args.url);
+      await _service.castTo(device.id, url, title: song.title, mime: args.mime);
 
       await _audioHandler.pause();
 
@@ -209,12 +221,8 @@ class DlnaNotifier extends Notifier<DlnaState> {
     if (device == null) return;
     try {
       final args = _castArgsFor(song);
-      await _service.castTo(
-        device.id,
-        args.url,
-        title: song.title,
-        mime: args.mime,
-      );
+      final url = await _toCastReachableUrl(args.url);
+      await _service.castTo(device.id, url, title: song.title, mime: args.mime);
       state = state.copyWith(isPlaying: true, error: () => null);
     } catch (e) {
       state = state.copyWith(error: () => e.toString());
