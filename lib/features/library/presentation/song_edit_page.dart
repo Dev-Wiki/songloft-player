@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../config/constants.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/url_helper.dart';
+import '../../../shared/models/artist.dart';
 import '../../../shared/models/song.dart';
 import '../../../shared/utils/responsive_snackbar.dart';
 import 'providers/songs_provider.dart';
@@ -23,7 +24,7 @@ class SongEditPage extends ConsumerStatefulWidget {
 class _SongEditPageState extends ConsumerState<SongEditPage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
-  late final TextEditingController _artistController;
+  final List<TextEditingController> _artistControllers = [];
   late final TextEditingController _albumController;
   late final TextEditingController _urlController;
   late final TextEditingController _coverUrlController;
@@ -49,7 +50,11 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.song?.title ?? '');
-    _artistController = TextEditingController(text: widget.song?.artist ?? '');
+    // 先用 songs.artist 显示串占位回显（保证进入页面即有内容，不空）；
+    // 编辑模式下异步拉取结构化 song_artists 覆盖为分行歌手。
+    _artistControllers.add(
+      TextEditingController(text: widget.song?.artist ?? ''),
+    );
     _albumController = TextEditingController(text: widget.song?.album ?? '');
     // 仅用 source_url（原始源地址）；不要 fallback 到 song.url，
     // 因为 song.url 是内部播放端点（/api/v1/songs/{id}/play），并非可编辑的源 URL。
@@ -64,12 +69,44 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
       text: widget.song?.lyricRemoteUrl ?? '',
     );
     _isVideo = widget.song?.isVideo ?? false;
+    if (isEditMode) {
+      _loadSongArtists();
+    }
+  }
+
+  /// 编辑模式：异步拉取结构化参与歌手（role=artist），用其名字覆盖成多行，
+  /// 使对唱歌曲回显为分行歌手而非合并串。拉取为空则保留占位回显不动。
+  Future<void> _loadSongArtists() async {
+    try {
+      final repository = ref.read(songsRepositoryProvider);
+      final artists = await repository.getSongArtists(widget.song!.id);
+      final names =
+          artists
+              .where((a) => a.role == ArtistRole.artist)
+              .map((a) => a.artist.name)
+              .where((n) => n.isNotEmpty)
+              .toList();
+      if (!mounted) return;
+      if (names.isEmpty) return; // 无结构化数据，保留占位回显
+      for (final c in _artistControllers) {
+        c.dispose();
+      }
+      _artistControllers.clear();
+      for (final name in names) {
+        _artistControllers.add(TextEditingController(text: name));
+      }
+      setState(() {});
+    } catch (_) {
+      // 拉取失败不影响编辑（保留占位回显），静默忽略
+    }
   }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _artistController.dispose();
+    for (final c in _artistControllers) {
+      c.dispose();
+    }
     _albumController.dispose();
     _urlController.dispose();
     _coverUrlController.dispose();
@@ -176,16 +213,8 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
               ),
               const SizedBox(height: 16),
 
-              // 艺术家
-              TextFormField(
-                controller: _artistController,
-                decoration: InputDecoration(
-                  labelText: l10n.libraryColumnArtist,
-                  hintText: l10n.libraryEditArtistHint,
-                  border: const OutlineInputBorder(),
-                ),
-                textInputAction: TextInputAction.next,
-              ),
+              // 参与歌手（多行：对唱/合唱分行填写，支持按任一歌手检索）
+              _buildArtistEditors(l10n),
               const SizedBox(height: 16),
 
               // 专辑（仅网络歌曲与本地歌曲，电台除外）
@@ -392,8 +421,96 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
     );
   }
 
+  Widget _buildArtistEditors(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.libraryColumnArtist,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline, size: 22),
+              tooltip: l10n.libraryEditArtistsAdd,
+              onPressed: _isSubmitting ? null : _addArtistField,
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.libraryEditArtistsHint,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        for (int i = 0; i < _artistControllers.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _artistControllers[i],
+                    decoration: InputDecoration(
+                      hintText: l10n.libraryEditArtistHint,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                if (_artistControllers.length > 1)
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline, size: 22),
+                    tooltip: l10n.libraryEditArtistsRemove,
+                    onPressed:
+                        _isSubmitting ? null : () => _removeArtistField(i),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _addArtistField() {
+    setState(() {
+      _artistControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeArtistField(int index) {
+    if (_artistControllers.length <= 1) return;
+    setState(() {
+      final c = _artistControllers.removeAt(index);
+      c.dispose();
+    });
+  }
+
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // 多歌手：收集非空行 → 显示串（"A & B"）+ 结构化输入（用于 setSongArtists）
+    final artistNames =
+        _artistControllers
+            .map((c) => c.text.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+    final displayArtist = artistNames.join(' & ');
+    final artistInputs =
+        artistNames
+            .asMap()
+            .entries
+            .map(
+              (e) => ArtistInput(
+                name: e.value,
+                role: ArtistRole.artist,
+                position: e.key,
+              ),
+            )
+            .toList();
 
     setState(() {
       _isSubmitting = true;
@@ -407,19 +524,18 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
         await repository.writeSongTags(
           widget.song!.id,
           title: _titleController.text.trim(),
-          artist: _artistController.text.trim(),
+          artist: displayArtist,
           album: _albumController.text.trim(),
           renameFile: _renameFile,
         );
+        // 同步结构化参与歌手（song_artists），使按任一歌手都能检索到该歌。
+        await repository.setSongArtists(widget.song!.id, artistInputs);
       } else if (isEditMode) {
         // 更新歌曲
         await repository.updateSong(
           widget.song!.id,
           title: _titleController.text.trim(),
-          artist:
-              _artistController.text.trim().isEmpty
-                  ? null
-                  : _artistController.text.trim(),
+          artist: displayArtist.isEmpty ? null : displayArtist,
           album:
               isRadio
                   ? null
@@ -437,6 +553,8 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
           isLive: null,
           isVideo: _isVideo,
         );
+        // 同步结构化参与歌手（song_artists）。
+        await repository.setSongArtists(widget.song!.id, artistInputs);
 
         // 歌词 URL 变化时单独更新
         if (!isRadio) {
@@ -462,10 +580,7 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
         // 创建电台
         await repository.createRadioSong(
           title: _titleController.text.trim(),
-          artist:
-              _artistController.text.trim().isEmpty
-                  ? null
-                  : _artistController.text.trim(),
+          artist: displayArtist.isEmpty ? null : displayArtist,
           url: _urlController.text.trim(),
           coverUrl:
               _coverUrlController.text.trim().isEmpty
@@ -477,10 +592,7 @@ class _SongEditPageState extends ConsumerState<SongEditPage> {
         // 创建网络歌曲
         await repository.createRemoteSong(
           title: _titleController.text.trim(),
-          artist:
-              _artistController.text.trim().isEmpty
-                  ? null
-                  : _artistController.text.trim(),
+          artist: displayArtist.isEmpty ? null : displayArtist,
           album:
               _albumController.text.trim().isEmpty
                   ? null

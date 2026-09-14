@@ -1053,6 +1053,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryEditArtistHint => 'Please enter an artist';
 
   @override
+  String get libraryEditArtistsAdd => 'Add artist';
+
+  @override
+  String get libraryEditArtistsRemove => 'Remove this artist';
+
+  @override
+  String get libraryEditArtistsHint =>
+      'One artist per line. Enter duet/group performers on separate lines so the song is findable by any of them.';
+
+  @override
   String get libraryEditAlbumHint => 'Please enter an album';
 
   @override

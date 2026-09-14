@@ -1,3 +1,4 @@
+import '../../../../shared/models/artist.dart';
 import '../../../../shared/models/song.dart';
 
 /// 歌曲仓库抽象接口
@@ -82,6 +83,12 @@ abstract class ISongsRepository {
     String? album,
     bool renameFile = false,
   });
+
+  /// 获取歌曲参与歌手（多值，已拆分）
+  Future<List<SongArtist>> getSongArtists(int id);
+
+  /// 全量更新歌曲参与歌手（PUT /songs/{id}/artists）
+  Future<List<SongArtist>> setSongArtists(int id, List<ArtistInput> artists);
 
   /// 删除歌曲
   Future<void> deleteSong(int id, {bool deleteFiles = false});

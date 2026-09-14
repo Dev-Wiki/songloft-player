@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../l10n/l10n_holder.dart';
+import '../../../shared/models/artist.dart';
 import '../../../shared/models/song.dart';
 import '../domain/repositories/songs_repository_interface.dart';
 import 'songs_api.dart';
@@ -188,6 +189,27 @@ class SongsRepository implements ISongsRepository {
         album: album,
         renameFile: renameFile,
       );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<List<SongArtist>> getSongArtists(int id) async {
+    try {
+      return await songsApi.getSongArtists(id);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<List<SongArtist>> setSongArtists(
+    int id,
+    List<ArtistInput> artists,
+  ) async {
+    try {
+      return await songsApi.setSongArtists(id, artists);
     } on DioException catch (e) {
       throw _handleError(e);
     }

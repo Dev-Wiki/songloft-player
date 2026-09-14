@@ -1936,6 +1936,24 @@ abstract class AppLocalizations {
   /// **'请输入艺术家'**
   String get libraryEditArtistHint;
 
+  /// No description provided for @libraryEditArtistsAdd.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加歌手'**
+  String get libraryEditArtistsAdd;
+
+  /// No description provided for @libraryEditArtistsRemove.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除该歌手'**
+  String get libraryEditArtistsRemove;
+
+  /// No description provided for @libraryEditArtistsHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'每行一位歌手。对唱/合唱分行填写，以便按任一歌手都能检索到这首歌。'**
+  String get libraryEditArtistsHint;
+
   /// No description provided for @libraryEditAlbumHint.
   ///
   /// In zh, this message translates to:

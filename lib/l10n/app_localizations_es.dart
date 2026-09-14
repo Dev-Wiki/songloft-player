@@ -1066,6 +1066,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get libraryEditArtistHint => 'Introduce un artista';
 
   @override
+  String get libraryEditArtistsAdd => 'Añadir artista';
+
+  @override
+  String get libraryEditArtistsRemove => 'Quitar este artista';
+
+  @override
+  String get libraryEditArtistsHint =>
+      'Un artista por línea. Introduce los intérpretes de dúo/grupo en líneas separadas para que la canción sea localizable por cualquiera de ellos.';
+
+  @override
   String get libraryEditAlbumHint => 'Introduce un álbum';
 
   @override

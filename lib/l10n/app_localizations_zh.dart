@@ -1031,6 +1031,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get libraryEditArtistHint => '请输入艺术家';
 
   @override
+  String get libraryEditArtistsAdd => '添加歌手';
+
+  @override
+  String get libraryEditArtistsRemove => '移除该歌手';
+
+  @override
+  String get libraryEditArtistsHint => '每行一位歌手。对唱/合唱分行填写，以便按任一歌手都能检索到这首歌。';
+
+  @override
   String get libraryEditAlbumHint => '请输入专辑';
 
   @override

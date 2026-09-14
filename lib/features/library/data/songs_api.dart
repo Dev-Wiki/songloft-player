@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../config/app_config.dart';
+import '../../../shared/models/artist.dart';
 import '../../../shared/models/library_stats.dart';
 import '../../../shared/models/song.dart';
 import '../../player/domain/playback_context.dart';
@@ -470,6 +471,43 @@ class SongsApi {
       '${AppConfig.apiPrefix}/songs/$id',
       queryParameters: deleteFiles ? {'delete_files': 'true'} : null,
     );
+  }
+
+  /// 获取歌曲参与歌手
+  ///
+  /// GET /api/v1/songs/{id}/artists
+  ///
+  /// 返回该歌全部参与歌手（含角色 artist/album_artist 与顺序）。多值歌手在此
+  /// 拆开返回，供编辑界面加载当前状态（对唱会得到两位主唱，而非合并字符串）。
+  Future<List<SongArtist>> getSongArtists(int id) async {
+    final response = await dio.get<Map<String, dynamic>>(
+      '${AppConfig.apiPrefix}/songs/$id/artists',
+    );
+    final list = response.data?['artists'] as List<dynamic>? ?? [];
+    return list
+        .map((e) => SongArtist.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// 全量更新歌曲参与歌手
+  ///
+  /// PUT /api/v1/songs/{id}/artists
+  ///
+  /// 用 [artists] 整组替换该歌的参与歌手（删旧建新）。每项含 name/role/position：
+  /// role 取 'artist'（主唱）或 'album_artist'（专辑歌手），缺省 'artist'。
+  /// 后端会按 role=artist 的名字重建 songs.artist 显示串（对唱得到 "A & B"）。
+  Future<List<SongArtist>> setSongArtists(
+    int id,
+    List<ArtistInput> artists,
+  ) async {
+    final response = await dio.put<Map<String, dynamic>>(
+      '${AppConfig.apiPrefix}/songs/$id/artists',
+      data: {'artists': artists.map((a) => a.toJson()).toList()},
+    );
+    final list = response.data?['artists'] as List<dynamic>? ?? [];
+    return list
+        .map((e) => SongArtist.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// 批量删除歌曲
