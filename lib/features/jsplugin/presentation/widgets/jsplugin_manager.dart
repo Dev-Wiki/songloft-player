@@ -735,6 +735,9 @@ class _JSPluginItemState extends ConsumerState<_JSPluginItem> {
       final api = ref.read(jsPluginApiProvider);
       await api.deletePlugin(widget.plugin.id, keepData: result.keepData);
       ref.invalidate(jsPluginsProvider);
+      // 后端会同步清理 plugin_order 中的孤儿条目（songloft-org/songloft#463），
+      // 本地缓存需同步失效，让主页网格重新拉取修正后的顺序。
+      ref.invalidate(pluginOrderProvider);
       if (mounted) {
         ResponsiveSnackBar.show(context, message: l10n.jspluginDeleted);
       }

@@ -906,6 +906,41 @@ class SettingsApi {
     }
   }
 
+  // ---------- 主页插件排序 ----------
+
+  Future<List<String>> getPluginOrder() async {
+    try {
+      final response = await dio.get(
+        '${AppConfig.apiPrefix}/settings/plugin-order',
+      );
+      final data = response.data as Map<String, dynamic>;
+      final order = data['order'];
+      if (order is List) {
+        return order.map((e) => e as String).toList();
+      }
+      return const [];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<List<String>> updatePluginOrder(List<String> order) async {
+    try {
+      final response = await dio.put(
+        '${AppConfig.apiPrefix}/settings/plugin-order',
+        data: {'order': order},
+      );
+      final data = response.data as Map<String, dynamic>;
+      final saved = data['order'];
+      if (saved is List) {
+        return saved.map((e) => e as String).toList();
+      }
+      return const [];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   // ---------- 曲库浏览视图配置 ----------
 
   Future<LibraryBrowseConfig> getLibraryBrowseConfig() async {

@@ -1522,6 +1522,18 @@ abstract class AppLocalizations {
   /// **'JS 插件'**
   String get jspluginGridTitle;
 
+  /// No description provided for @jspluginGridEditOrder.
+  ///
+  /// In zh, this message translates to:
+  /// **'排序'**
+  String get jspluginGridEditOrder;
+
+  /// No description provided for @jspluginGridDoneEditing.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成'**
+  String get jspluginGridDoneEditing;
+
   /// No description provided for @jspluginCleanupDone.
   ///
   /// In zh, this message translates to:
@@ -3655,7 +3667,7 @@ abstract class AppLocalizations {
   /// No description provided for @playlistEmptySongs.
   ///
   /// In zh, this message translates to:
-  /// **'歌单暂无歌曲'**
+  /// **'歌单暂无���曲'**
   String get playlistEmptySongs;
 
   /// No description provided for @playlistEmptySongsSubtitle.

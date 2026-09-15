@@ -810,6 +810,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jspluginGridTitle => 'JS 插件';
 
   @override
+  String get jspluginGridEditOrder => '排序';
+
+  @override
+  String get jspluginGridDoneEditing => '完成';
+
+  @override
   String get jspluginCleanupDone => '清理完成';
 
   @override
@@ -1965,7 +1971,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playlistDelete => '删除歌单';
 
   @override
-  String get playlistEmptySongs => '歌单暂无歌曲';
+  String get playlistEmptySongs => '歌单暂无���曲';
 
   @override
   String get playlistEmptySongsSubtitle => '添加一些喜欢的音乐吧';

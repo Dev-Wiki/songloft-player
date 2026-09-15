@@ -839,6 +839,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jspluginGridTitle => 'Plugins JS';
 
   @override
+  String get jspluginGridEditOrder => 'Ordenar';
+
+  @override
+  String get jspluginGridDoneEditing => 'Hecho';
+
+  @override
   String get jspluginCleanupDone => 'Limpieza completada';
 
   @override

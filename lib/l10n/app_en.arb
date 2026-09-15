@@ -449,6 +449,8 @@
   "jspluginAdd": "Add",
   "jspluginAuthConfigured": "Authentication configured",
   "jspluginGridTitle": "JS Plugins",
+  "jspluginGridEditOrder": "Edit",
+  "jspluginGridDoneEditing": "Done",
   "jspluginCleanupDone": "Cleanup complete",
   "libraryPlayFailed": "Playback failed",
   "libraryNoPlayableSongs": "No songs to play",

@@ -880,6 +880,43 @@ final tabConfigProvider = AsyncNotifierProvider<TabConfigNotifier, TabConfig>(
 );
 
 // ============================================================================
+// 主页插件排序 Provider
+// ============================================================================
+
+/// 主页插件网格排序 Notifier。存储 entryPath 序列。
+/// 业务端点：GET/PUT /api/v1/settings/plugin-order
+class PluginOrderNotifier extends AsyncNotifier<List<String>> {
+  @override
+  Future<List<String>> build() async {
+    final api = ref.watch(settingsApiProvider);
+    try {
+      return await api.getPluginOrder();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> updateOrder(List<String> order) async {
+    state = AsyncValue.data(order);
+    try {
+      final api = ref.read(settingsApiProvider);
+      // 服务端保存时会清理已不存在的孤儿条目，以服务端返回为准
+      final saved = await api.updatePluginOrder(order);
+      state = AsyncValue.data(saved);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+}
+
+/// 主页插件网格排序 Provider
+final pluginOrderProvider =
+    AsyncNotifierProvider<PluginOrderNotifier, List<String>>(
+      PluginOrderNotifier.new,
+    );
+
+// ============================================================================
 // 曲库浏览视图配置 Provider
 // ============================================================================
 

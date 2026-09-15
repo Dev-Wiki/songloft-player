@@ -477,6 +477,8 @@
   "jspluginAdd": "Añadir",
   "jspluginAuthConfigured": "Autenticación configurada",
   "jspluginGridTitle": "Plugins JS",
+  "jspluginGridEditOrder": "Ordenar",
+  "jspluginGridDoneEditing": "Hecho",
   "jspluginCleanupDone": "Limpieza completada",
   "libraryPlayFailed": "Error de reproducción",
   "libraryNoPlayableSongs": "No hay canciones para reproducir",
