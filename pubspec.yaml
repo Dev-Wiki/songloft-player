@@ -108,6 +108,9 @@ dependencies:
   flutter_patcher: ^0.1.3
   # 桌面小组件（Android App Widget / iOS WidgetKit）
   home_widget: ^0.7.0
+  # 主页插件网格拖拽排序（songloft-org/songloft#463）。Material 自身的
+  # ReorderableListView 只做单列；GridView 版本需要外部包。
+  reorderable_grid_view: ^2.2.8
 
 dependency_overrides:
   # smtc_windows 1.1.0 的 Rust codegen 使用 flutter_rust_bridge 2.11.1 编译，

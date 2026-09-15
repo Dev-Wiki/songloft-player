@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 import '../../../../config/app_config.dart';
 import '../../../../core/router/app_router.dart';
@@ -12,11 +13,7 @@ import '../../data/plugin_order.dart';
 import '../providers/jsplugin_provider.dart';
 import 'plugin_icon.dart';
 
-/// JS 插件入口网格
-///
-/// 非编辑态：GridView 排布卡片。编辑态：切换成 ReorderableListView + 拖拽把手
-/// （与曲库"自定义视图"编辑器一致的模式）—— 抛掉二维 flex-wrap 拖拽，走单列
-/// 拖动条，交互统一且能在 Web/桌面/移动都稳定工作。
+/// JS 插件入口网格组件
 class JSPluginGrid extends ConsumerStatefulWidget {
   const JSPluginGrid({super.key});
 
@@ -80,18 +77,75 @@ class _JSPluginGridState extends ConsumerState<JSPluginGrid> {
               ),
             ),
             const SizedBox(height: 4),
-            if (_editing)
-              _PluginReorderList(
-                plugins: ordered,
-                onReorder: (next) {
-                  final entryPaths = next.map((p) => p.entryPath!).toList();
-                  ref
-                      .read(pluginOrderProvider.notifier)
-                      .updateOrder(entryPaths);
-                },
-              )
-            else
-              _PluginGrid(plugins: ordered),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final containerWidth = constraints.maxWidth - 24;
+                final int crossAxisCount;
+                if (context.isMobile ||
+                    containerWidth < ResponsiveBreakpoints.tablet) {
+                  crossAxisCount = (containerWidth / 90).floor().clamp(3, 5);
+                } else if (containerWidth < ResponsiveBreakpoints.desktop) {
+                  crossAxisCount = (containerWidth / 110).floor().clamp(4, 5);
+                } else {
+                  crossAxisCount = (containerWidth / 120).floor().clamp(5, 8);
+                }
+
+                final gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 0.88,
+                );
+
+                if (_editing) {
+                  return ReorderableGridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    gridDelegate: gridDelegate,
+                    itemCount: ordered.length,
+                    // 按下即拖，不用长按。库默认是 kLongPressTimeout（~500ms），
+                    // 用户反馈"每个插件上加个拖动按钮更方便"——此处配合卡片
+                    // 右上角的 drag_indicator 图标做视觉提示，用户按到卡片
+                    // 任意位置都能立刻开始拖动。
+                    dragStartDelay: Duration.zero,
+                    itemBuilder: (context, index) {
+                      final plugin = ordered[index];
+                      return _JSPluginCard(
+                        key: ValueKey(plugin.entryPath),
+                        plugin: plugin,
+                        editing: true,
+                      );
+                    },
+                    onReorder: (oldIndex, newIndex) {
+                      final next = List<JSPlugin>.of(ordered);
+                      final moved = next.removeAt(oldIndex);
+                      next.insert(newIndex, moved);
+                      final entryPaths = next.map((p) => p.entryPath!).toList();
+                      // 乐观提交给后端；provider 内部会以服务端返回为准
+                      ref
+                          .read(pluginOrderProvider.notifier)
+                          .updateOrder(entryPaths);
+                    },
+                  );
+                }
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  gridDelegate: gridDelegate,
+                  itemCount: ordered.length,
+                  itemBuilder: (context, index) {
+                    final plugin = ordered[index];
+                    return _JSPluginCard(
+                      key: ValueKey(plugin.entryPath),
+                      plugin: plugin,
+                    );
+                  },
+                );
+              },
+            ),
           ],
         );
       },
@@ -101,116 +155,12 @@ class _JSPluginGridState extends ConsumerState<JSPluginGrid> {
   }
 }
 
-class _PluginGrid extends StatelessWidget {
-  final List<JSPlugin> plugins;
-
-  const _PluginGrid({required this.plugins});
-
-  @override
-  Widget build(BuildContext context) {
-    final isMobile = context.isMobile;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final containerWidth = constraints.maxWidth - 24;
-        final crossAxisCount = _crossAxisCountFor(containerWidth, isMobile);
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 0.88,
-          ),
-          itemCount: plugins.length,
-          itemBuilder: (context, index) {
-            final plugin = plugins[index];
-            return _JSPluginCard(
-              key: ValueKey(plugin.entryPath),
-              plugin: plugin,
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-/// 网格列数：随宽度自适应，逻辑与原实现保持一致（手机 / 平板 / 桌面阶梯）。
-int _crossAxisCountFor(double containerWidth, bool isMobile) {
-  if (isMobile || containerWidth < ResponsiveBreakpoints.tablet) {
-    return (containerWidth / 90).floor().clamp(3, 5);
-  }
-  if (containerWidth < ResponsiveBreakpoints.desktop) {
-    return (containerWidth / 110).floor().clamp(4, 5);
-  }
-  return (containerWidth / 120).floor().clamp(5, 8);
-}
-
-class _PluginReorderList extends StatelessWidget {
-  final List<JSPlugin> plugins;
-  final ValueChanged<List<JSPlugin>> onReorder;
-
-  const _PluginReorderList({required this.plugins, required this.onReorder});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: ReorderableListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        buildDefaultDragHandles: false,
-        itemCount: plugins.length,
-        onReorderItem: (oldIndex, newIndex) {
-          final next = List<JSPlugin>.of(plugins);
-          final moved = next.removeAt(oldIndex);
-          next.insert(newIndex, moved);
-          onReorder(next);
-        },
-        proxyDecorator: (child, index, animation) {
-          return AnimatedBuilder(
-            animation: animation,
-            builder:
-                (context, child) => Material(
-                  elevation: 4,
-                  borderRadius: BorderRadius.circular(12),
-                  child: child,
-                ),
-            child: child,
-          );
-        },
-        itemBuilder: (context, index) {
-          final plugin = plugins[index];
-          return ListTile(
-            key: ValueKey(plugin.entryPath),
-            leading: PluginIcon(
-              iconUrl: plugin.iconUrl,
-              displayName: plugin.displayName,
-              size: 32,
-            ),
-            title: Text(plugin.displayName),
-            trailing: ReorderableDragStartListener(
-              index: index,
-              child: Icon(
-                Icons.drag_handle,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
+/// JS 插件卡片组件
 class _JSPluginCard extends StatelessWidget {
   final JSPlugin plugin;
+  final bool editing;
 
-  const _JSPluginCard({super.key, required this.plugin});
+  const _JSPluginCard({super.key, required this.plugin, this.editing = false});
 
   @override
   Widget build(BuildContext context) {
@@ -243,11 +193,35 @@ class _JSPluginCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      color: colorScheme.surfaceContainerLow,
-      child: InkWell(onTap: () => _openPlugin(context), child: content),
+      color:
+          editing
+              ? colorScheme.surfaceContainerHigh
+              : colorScheme.surfaceContainerLow,
+      child:
+          editing
+              // 编辑态：卡片任意位置按下即拖（见外层 dragStartDelay: Duration.zero）；
+              // 右上角小图标只做视觉提示，告诉用户这张卡是可拖的。
+              ? Stack(
+                children: [
+                  Positioned.fill(child: content),
+                  Positioned(
+                    top: 2,
+                    right: 2,
+                    child: IgnorePointer(
+                      child: Icon(
+                        Icons.drag_indicator,
+                        size: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+              : InkWell(onTap: () => _openPlugin(context), child: content),
     );
   }
 
+  /// 打开插件入口
   void _openPlugin(BuildContext context) {
     if (plugin.entryPath == null || plugin.entryPath!.isEmpty) {
       return;

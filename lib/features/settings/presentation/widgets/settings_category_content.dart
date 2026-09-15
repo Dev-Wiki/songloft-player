@@ -386,6 +386,21 @@ class _SettingsCategoryContentState
           ),
         ],
       ),
+      if (effectiveTabs.isNotEmpty)
+        SectionCard(
+          title: l10n.settingsTabConfigPluginOrder,
+          icon: Icons.reorder,
+          children: [
+            _PluginTabReorderList(
+              pluginTabs: effectiveTabs,
+              plugins: plugins,
+              onReorder: (newTabs) => _updateTabConfig(
+                config.copyWith(pluginTabs: newTabs),
+                false,
+              ),
+            ),
+          ],
+        ),
     ];
   }
 
@@ -1978,6 +1993,65 @@ class _FontScaleSelector extends ConsumerWidget {
       selected: {current},
       onSelectionChanged: (selected) {
         ref.read(fontScaleProvider.notifier).setScale(selected.first);
+      },
+    );
+  }
+}
+
+class _PluginTabReorderList extends StatelessWidget {
+  final List<PluginTabEntry> pluginTabs;
+  final List<JSPlugin> plugins;
+  final ValueChanged<List<PluginTabEntry>> onReorder;
+
+  const _PluginTabReorderList({
+    required this.pluginTabs,
+    required this.plugins,
+    required this.onReorder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
+      itemCount: pluginTabs.length,
+      onReorderItem: (oldIndex, newIndex) {
+        final newList = List<PluginTabEntry>.from(pluginTabs);
+        final item = newList.removeAt(oldIndex);
+        newList.insert(newIndex, item);
+        onReorder(newList);
+      },
+      proxyDecorator: (child, index, animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) => Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(12),
+            child: child,
+          ),
+          child: child,
+        );
+      },
+      itemBuilder: (context, index) {
+        final pt = pluginTabs[index];
+        final plugin = plugins.where((p) => p.entryPath == pt.entryPath).firstOrNull;
+
+        return ListTile(
+          key: ValueKey(pt.entryPath),
+          leading: PluginNavIcon(
+            iconUrl: plugin?.iconUrl,
+            size: 24,
+            fallbackIcon: const Icon(Icons.extension_outlined),
+          ),
+          title: Text(pt.name),
+          trailing: ReorderableDragStartListener(
+            index: index,
+            child: Icon(Icons.drag_handle, color: colorScheme.onSurfaceVariant),
+          ),
+        );
       },
     );
   }

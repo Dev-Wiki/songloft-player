@@ -16,7 +16,6 @@ import '../../features/library/presentation/tag_songs_page.dart';
 import '../../features/playlist/presentation/playlist_detail_page.dart';
 import '../../features/settings/presentation/servers_page.dart';
 import '../../features/settings/presentation/settings_page.dart';
-import '../../features/settings/presentation/tab_config_page.dart';
 import '../../features/jsplugin/presentation/widgets/plugin_registry.dart';
 import '../../features/settings/presentation/duplicate_check_page.dart';
 import '../../features/settings/presentation/shortcut_settings_page.dart';
@@ -49,7 +48,6 @@ class AppRoutes {
   static const String playlistDetail = '/playlists/:id';
   static const String settings = '/settings';
   static const String servers = '/settings/servers';
-  static const String tabConfig = '/settings/tab-config';
   static const String duplicateCheck = '/settings/duplicate-check';
   static const String shortcuts = '/settings/shortcuts';
   static const String clientDownload = '/settings/download';
@@ -289,12 +287,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder:
                 (context, state) =>
                     const NoTransitionPage(child: ServersPage()),
-          ),
-
-          // 菜单设置
-          GoRoute(
-            path: AppRoutes.tabConfig,
-            builder: (context, state) => const TabConfigPage(),
           ),
 
           // 重复歌曲检测
