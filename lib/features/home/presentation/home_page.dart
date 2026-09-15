@@ -273,9 +273,14 @@ class _HomePageState extends ConsumerState<HomePage> {
 }
 
 /// 问候栏 AppBar
-class _GreetingAppBar extends StatelessWidget {
+class _GreetingAppBar extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 当前播放上下文来自某歌单时，提供一键进入该歌单的快捷定位按钮，
+    // 避免该歌单不在首页可视范围（被网格 maxItems 截断 / 轮播靠后）时，
+    // 用户要绕去曲库「全部歌单」翻很多页才能再次进入（songloft-org/songloft#464）。
+    // 与歌单详情页「定位到正在播放」同图标，呼应「和歌单内歌曲快速定位一样」。
+    final sourcePlaylistId = ref.watch(sourcePlaylistIdProvider);
     return SliverAppBar(
       expandedHeight: context.responsive<double>(
         mobile: 90,
@@ -285,6 +290,14 @@ class _GreetingAppBar extends StatelessWidget {
       ),
       floating: false,
       pinned: true,
+      actions: [
+        if (sourcePlaylistId != null)
+          IconButton(
+            icon: const Icon(Icons.my_location),
+            tooltip: AppLocalizations.of(context).homeLocatePlayingPlaylist,
+            onPressed: () => context.push('/playlists/$sourcePlaylistId'),
+          ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           _getGreeting(context),

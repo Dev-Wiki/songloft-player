@@ -1209,6 +1209,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get homeLocatePlayingPlaylist => '定位到正在播放的歌单';
+
+  @override
   String homeSongCount(int count) {
     return '$count 首歌曲';
   }

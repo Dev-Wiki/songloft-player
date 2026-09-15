@@ -2272,6 +2272,12 @@ abstract class AppLocalizations {
   /// **'{count} 首'**
   String homeSongCountShort(int count);
 
+  /// No description provided for @homeLocatePlayingPlaylist.
+  ///
+  /// In zh, this message translates to:
+  /// **'定位到正在播放的歌单'**
+  String get homeLocatePlayingPlaylist;
+
   /// No description provided for @homeSongCount.
   ///
   /// In zh, this message translates to:

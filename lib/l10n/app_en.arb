@@ -658,6 +658,7 @@
       }
     }
   },
+  "homeLocatePlayingPlaylist": "Locate playing playlist",
   "homeSongCount": "{count} songs",
   "@homeSongCount": {
     "placeholders": {

@@ -1256,6 +1256,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get homeLocatePlayingPlaylist => 'Localizar lista en reproducción';
+
+  @override
   String homeSongCount(int count) {
     return '$count canciones';
   }

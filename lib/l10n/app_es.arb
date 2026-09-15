@@ -686,6 +686,7 @@
       }
     }
   },
+  "homeLocatePlayingPlaylist": "Localizar lista en reproducción",
   "homeSongCount": "{count} canciones",
   "@homeSongCount": {
     "placeholders": {

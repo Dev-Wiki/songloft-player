@@ -35,6 +35,7 @@ void main() {
     WidgetTester tester, {
     int? normalCount,
     int? radioCount,
+    int? sourcePlaylistId,
     PaginatedPlaylistsNotifier Function()? normalNotifier,
     HomeGridConfig config = HomeGridConfig.defaults,
   }) async {
@@ -74,7 +75,7 @@ void main() {
             () => throw UnimplementedError('mock'),
           ),
           isPlayingProvider.overrideWith((ref) => false),
-          sourcePlaylistIdProvider.overrideWith((ref) => null),
+          sourcePlaylistIdProvider.overrideWith((ref) => sourcePlaylistId),
         ],
         child: const MaterialApp(
           locale: Locale('zh'),
@@ -235,6 +236,20 @@ void main() {
     expect(find.text('加载失败'), findsOneWidget);
     expect(find.text('我的电台'), findsNothing);
     expect(find.byType(GridView), findsNothing);
+  });
+
+  testWidgets('正在播放来自某歌单时，AppBar 出现定位按钮（#464）', (tester) async {
+    useWideViewport(tester);
+    await pumpHome(tester, normalCount: 5, radioCount: 0, sourcePlaylistId: 3);
+
+    expect(find.byTooltip('定位到正在播放的歌单'), findsOneWidget);
+  });
+
+  testWidgets('无歌单播放上下文时不显示定位按钮（#464）', (tester) async {
+    useWideViewport(tester);
+    await pumpHome(tester, normalCount: 5, radioCount: 0);
+
+    expect(find.byTooltip('定位到正在播放的歌单'), findsNothing);
   });
 }
 

@@ -1240,6 +1240,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get homeLocatePlayingPlaylist => 'Locate playing playlist';
+
+  @override
   String homeSongCount(int count) {
     return '$count songs';
   }

@@ -763,6 +763,7 @@
       }
     }
   },
+  "homeLocatePlayingPlaylist": "定位到正在播放的歌单",
   "homeSongCount": "{count} 首歌曲",
   "@homeSongCount": {
     "placeholders": {
