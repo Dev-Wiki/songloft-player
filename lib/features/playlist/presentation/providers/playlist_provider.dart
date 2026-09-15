@@ -419,6 +419,7 @@ class PaginatedSongsNotifier extends AsyncNotifier<PaginatedSongsState> {
 
   /// 切换排序（视图排序，不改变 position）并持久化到服务端
   Future<void> setSort(String sort, String order) async {
+    if (_sort == sort && _order == order) return;
     _sort = sort;
     _order = order;
     state = const AsyncValue.loading();
