@@ -1243,7 +1243,7 @@
   "playlistEditPlaylist": "编辑歌单",
   "playlistEditAction": "编辑",
   "playlistDelete": "删除歌单",
-  "playlistEmptySongs": "歌单暂无���曲",
+  "playlistEmptySongs": "歌单暂无歌曲",
   "playlistEmptySongsSubtitle": "添加一些喜欢的音乐吧",
   "playlistLabelBuiltIn": "内置",
   "playlistLabelAutoCreated": "自动创建",

@@ -3667,7 +3667,7 @@ abstract class AppLocalizations {
   /// No description provided for @playlistEmptySongs.
   ///
   /// In zh, this message translates to:
-  /// **'歌单暂无���曲'**
+  /// **'歌单暂无歌曲'**
   String get playlistEmptySongs;
 
   /// No description provided for @playlistEmptySongsSubtitle.

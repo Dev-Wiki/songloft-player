@@ -1971,7 +1971,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playlistDelete => '删除歌单';
 
   @override
-  String get playlistEmptySongs => '歌单暂无���曲';
+  String get playlistEmptySongs => '歌单暂无歌曲';
 
   @override
   String get playlistEmptySongsSubtitle => '添加一些喜欢的音乐吧';
